@@ -120,8 +120,8 @@ if __name__ == "__main__":
     DownloadCalibPrismOption = 0
     FirstCapNrmOption = 0
     FirstMVSOption = 0
-    SecondRefineNrmOption = 1
-    SecondMVSOption = 1
+    SecondRefineNrmOption = 0
+    SecondMVSOption = 0
     FinalMeshOpt = 1
 
     logger.info("Start dealing object: {0}".format(OBJECT))
@@ -1079,19 +1079,17 @@ if __name__ == "__main__":
             os.environ.update(_environ)
 
     if FinalMeshOpt:
-        MeshOpt = 1
+        MeshOpt = 0
         MeshOptPreprocess = 1
         MeshOptCapNrmCombine = 1
         MeshOptSecond = 1
-        MeshOptSecondPreprocess = 1
-        MeshOptSecondCapNrmCombine = 1
-        CapSimOption = 0
-        CapNrmCombine = 0
+        MeshOptSecondPreprocess = 0
+        MeshOptSecondCapNrmCombine = 0
         FitRouOption = 1
         texWidth="1024"
         texHeight="1024"
         edgeLength = "0.001"
-        nIter = 2
+        meshOpt_nIter = 2
 
         # MODEL_ROOT = os.path.join(OBJECT_ROOT, r"Recover\Model")
         # MeshOptIter = os.path.join(OBJECT_ROOT, r"Recover\Model","MeshOpt")
@@ -1103,160 +1101,182 @@ if __name__ == "__main__":
                 os.environ['PATH'] = BUILD_ROOT + ";" + TOOL_ROOT + ";" + TOOL_LCT_ROOT
 
             if MeshOpt:
-                # for iter in range(nIter):
-                reModel = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "Recover.obj")
-                reModelR = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverR.obj")
-                reModelUV = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverUV.obj")
-                reModelUVR = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverUVR.obj")
-                if MeshOptPreprocess:
-                    logger.info("Preprocess model ")
-                    # remove degenerated faces
-                    # rmBadFace(reModel, reModelR)
-                    mesh = trimesh.load(reModel)
-                    mesh.remove_degenerate_faces()
-                    # mesh = mesh.subdivide()
-                    mesh.export(reModelR)
+                logger.info("Meah opt:")
 
-                    logger.info("Remesh model ")
-                    re = subprocess.run(
-                            ["LCT", "-i" , reModelR, "-o" , reModelR,"-l",edgeLength],
-                            stdout=True, stderr=True, check=True)
+                # each view: format string
+                viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
+                nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
+                viewMeshOptDir = os.path.join(nrmRefineDirectory, "FramesMeshOpt")
 
-                    logger.info("UVAtlas ")
-                    # UVAtlas parameterization
-                    re = subprocess.run(
-                        ["UVAtlas", "-iv","TEXCOORD","-w",texWidth,"-h",texHeight,"-t","-y", "-o", reModelUV, reModelR],
-                        stdout=True, stderr=True, check=True)
+                # recovered model dir:
+                meshFinalDir = os.path.join(OBJECT_ROOT, r"Recover\Model\Final")
+                iterDir = os.path.join(meshFinalDir, "Iter_MeshOpt")
+                firstModel = os.path.join(meshFinalDir, "Recover.obj")
+                finalIterModel = os.path.join(meshFinalDir, "RecoverFinal.obj")
+                lastIterModel = os.path.join(iterDir, "Iter_%04d_RecoverFinal.obj" % (meshOpt_nIter - 1))
 
-                    logger.info("Project recovered model into each view:")
-                    for v in range(startView, nViewsCount):
-                        logger.info("Dealing view: {0}th".format(v))
-                        modelFile = reModelUV
+                if not os.path.exists(iterDir):
+                    os.makedirs(iterDir)
 
-                        viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d" % v)
-                        framesDirectory = os.path.join(viewDirectory, "Frames")
+                for iter in range(meshOpt_nIter):
+                    logger.info("Mesh opt iter {}".format(iter))
+                    viewIterDir = os.path.join(viewMeshOptDir, "Iter_%04d" % iter)
+                    viewIterFramesDir = os.path.join(viewIterDir, "Frames")
 
-                        nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
-                        nrmRefineFramesDirectory = os.path.join(nrmRefineDirectory, "FramesMeshOpt")
+                    reModel = os.path.join(iterDir,"Iter_%04d_RecoverFinal.obj" % (iter - 1))
+                    reModelR = os.path.join(iterDir, "Iter_%04d_RecoverR.obj"% iter)
+                    reModelUV = os.path.join(iterDir, "Iter_%04d_RecoverUV.obj"% iter)
+                    reModelUVR = os.path.join(iterDir, "Iter_%04d_RecoverUVR.obj"% iter)
+                    reModelUpt = os.path.join(iterDir, "Iter_%04d_RecoverUpdate.obj"% iter)
+                    reModelUptPly = os.path.join(iterDir, "Iter_%04d_RecoverUpdate.ply"% iter)
+                    reModelFinal = os.path.join(iterDir, "Iter_%04d_RecoverFinal.ply"% iter)
+                    reModelFinalObj = os.path.join(iterDir, "Iter_%04d_RecoverFinal.obj"% iter)
+                    reModelFinalPoission = os.path.join(iterDir, "Iter_%04d_RecoverFinalPoission.ply"% iter)
+                    reModelFinalTrim = os.path.join(iterDir, r"Iter_%04d_RecoverFinalTrim.ply"% iter)
+                    reModelFinalPost = os.path.join(iterDir, "Iter_%04d_RecoverPostProcess.obj"% iter)
+                    if(iter == 0):
+                        reModel = firstModel
+                    if MeshOptPreprocess:
+                        logger.info("Preprocess model ")
+                        # remove degenerated faces
+                        # rmBadFace(reModel, reModelR)
+                        mesh = trimesh.load(reModel)
+                        mesh.remove_degenerate_faces()
+                        # mesh = mesh.subdivide()
+                        mesh.export(reModelR)
 
-                        cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt" % v)
-                        renderOption = "2"
+                        logger.info("Remesh model ")
                         re = subprocess.run(
-                            ["CapSim", "-framesDirectory=" + nrmRefineFramesDirectory, "-modelFile=" + modelFile,
-                             "-cameraConfig=" + cameraConfig, "-cameraExtrin=" + cameraExtrinsic,
-                             "-viewScale=" + viewScale, "-flipZ",
-                             "-renderOption=" + renderOption],
+                                ["LCT", "-i" , reModelR, "-o" , reModelR,"-l",edgeLength],
+                                stdout=True, stderr=True, check=True)
+
+                        logger.info("UVAtlas ")
+                        # UVAtlas parameterization
+                        re = subprocess.run(
+                            ["UVAtlas", "-iv","TEXCOORD","-w",texWidth,"-h",texHeight,"-y", "-o", reModelUV, reModelR],
                             stdout=True, stderr=True, check=True)
 
-                if MeshOptCapNrmCombine:
-                    # combine all views' nrm into uv texture
-                    logger.info("CapTexCombine: combine into texture space ")
-                    viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
+                        logger.info("Project recovered model into each view:")
 
-                    framesDirectory = os.path.join(viewDirectory, "Frames")
-                    nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
-                    nrmRefineFramesDirectory = os.path.join(nrmRefineDirectory, "FramesMeshOpt")
-                    nrmRefineIterFinalDir = os.path.join(nrmRefineDirectory, "Iter", "Iter_final")
-                    cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt")
+                        logger.info("CapMultiSim ")
+                        CapMultiSimOption = 1
+                        if CapMultiSimOption:
+                            cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt")
+                            renderOption = "2"
+                            re = subprocess.run(
+                                ["CapMultiSim", "-framesDirectory=" + viewIterFramesDir, "-modelFile=" + reModelUV,
+                                 "-cameraConfig=" + cameraConfig, "-cameraExtrin=" + cameraExtrinsic,
+                                 "-viewScale=" + viewScale, "-flipZ",
+                                 "-renderOption=" + renderOption, "-nViews=" + nViews],
+                                stdout=True, stderr=True, check=True)
 
-                    # viewRecNrmDir = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-pig2\Views\View_%04d\Recover\Combine\Iter\Iter_final\refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=1_dptWeight=1_fDistTH=0.01_nDptIters=1"
-                    viewNrmRefineImgFile = os.path.join(nrmRefineIterFinalDir,r"nrmR.pfm") #in world space where nrm is estimated
-                    viewRecNrmDir = os.path.join(nrmRefineDirectory,nrmRefRecDirName)
-                    viewDistImgFile = os.path.join(viewRecNrmDir, "distR.pfm")
-                    viewNrmImgFile = os.path.join(viewRecNrmDir, "nrmObj.pfm")
-                    # viewMaskImgFile = os.path.join(nrmRefineFramesDirectory, "mask.pfm")
-                    viewGeoNrmImgFile = os.path.join(nrmRefineFramesDirectory, "nrmObj.pfm")
-                    viewTexCoordImgFile = os.path.join(nrmRefineFramesDirectory, "tex.pfm")
-                    viewMaskImgFile = os.path.join(nrmRefineIterFinalDir, "specNicePeakMask.pfm")
+                        # for v in range(startView, nViewsCount):
+                        #     logger.info("Dealing view: {0}th".format(v))
+                        #     modelFile = reModelUV
+                        #
+                        #     viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d" % v)
+                        #     framesDirectory = os.path.join(viewDirectory, "Frames")
+                        #
+                        #     nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
+                        #     nrmRefineFramesDirectory = os.path.join(nrmRefineDirectory, "FramesMeshOpt")
+                        #
+                        #     cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt" % v)
+                        #     renderOption = "2"
+                        #     re = subprocess.run(
+                        #         ["CapSim", "-framesDirectory=" + nrmRefineFramesDirectory, "-modelFile=" + modelFile,
+                        #          "-cameraConfig=" + cameraConfig, "-cameraExtrin=" + cameraExtrinsic,
+                        #          "-viewScale=" + viewScale, "-flipZ",
+                        #          "-renderOption=" + renderOption],
+                        #         stdout=True, stderr=True, check=True)
 
-                    refineNrmRouWeight = os.path.join(nrmRefineIterFinalDir, r"Base_r_%.5f/weight.pfm")
-                    refineNrmDiffWeight = os.path.join(nrmRefineIterFinalDir, r"Base_diffuse/weight.pfm")
+                    if MeshOptCapNrmCombine:
+                        # combine all views' nrm into uv texture
+                        logger.info("CapTexCombine: combine into texture space ")
+                        viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
 
-                    texNrmImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "TexNrm.pfm")
-                    texPosImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "TexPos.pfm")
-                    texDiffImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", r"Base_diffuse/weight.pfm")
-                    texSpecRouImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", r"Base_r_%.5f/weight.pfm")
-                    texSpecFitImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "result_specular.pfm")
-                    texRouFitImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "result_roughness_fitted.pfm")
+                        framesDirectory = os.path.join(viewDirectory, "Frames")
+                        nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
+                        nrmRefineIterFinalDir = os.path.join(nrmRefineDirectory, "Iter", "Iter_final")
+                        cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt")
 
-                    reModelUpt = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverUpdate.obj")
-                    reModelUptPly = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverUpdate.ply")
-                    reModelFinal = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverFinal.ply")
-                    reModelFinalObj = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverFinal.obj")
-                    reModelFinalPost = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverPostProcess.obj")
+                        # viewRecNrmDir = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-pig2\Views\View_%04d\Recover\Combine\Iter\Iter_final\refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=1_dptWeight=1_fDistTH=0.01_nDptIters=1"
+                        viewNrmRefineImgFile = os.path.join(nrmRefineIterFinalDir,r"nrmR.pfm") #in world space where nrm is estimated
+                        # need to be changed
+                        viewRecNrmDir = os.path.join(nrmRefineDirectory,nrmRefRecDirName)
+                        viewDistImgFile = os.path.join(viewRecNrmDir, "distR.pfm")
+                        viewNrmImgFile = os.path.join(viewRecNrmDir, "nrmObj.pfm")
+                        # viewMaskImgFile = os.path.join(nrmRefineFramesDirectory, "mask.pfm")
+                        viewGeoNrmImgFile = os.path.join(viewIterFramesDir, "nrmObj.pfm")
+                        viewTexCoordImgFile = os.path.join(viewIterFramesDir, "tex.pfm")
+                        viewMaskImgFile = os.path.join(nrmRefineIterFinalDir, "specNicePeakMask.pfm")
 
-                    # re = subprocess.run(
-                    #     ["CapNrmCombine",
-                    #      "-viewNrmImgFile=" + viewNrmImgFile, "-viewDistImgFile=" + viewDistImgFile,
-                    #      "-viewTexCoordImgFile=" + viewTexCoordImgFile,
-                    #      "-viewDiffWeightFile=" + refineNrmDiffWeight, "-viewSpecRouWeightFile=" + refineNrmRouWeight,
-                    #      "-genericRoughnesses=" + genericRoughnesses,
-                    #      "-texNrmImgFile=" + texNrmImgFile,
-                    #      "-texDiffImgFile=" + texDiffImgFile,
-                    #      "-texSpecRouImgFile=" + texSpecRouImgFile,
-                    #      "-viewMaskImgFile=" + viewMaskImgFile, "-nViews=" + nViews, "-width=" + texWidth,
-                    #      "-height=" + texHeight,
-                    #      "-srcModelFile=" + reModelUV, "-tarModelFile=" + reModelUpt, "-flipZ","--solveRou",
-                    #      "-texSpecFitImgFile=" + texSpecFitImgFile, "-texRouFitImgFile=" + texRouFitImgFile
-                    #      ], stdout=True, stderr=True, check=True)
+                        refineNrmRouWeight = os.path.join(nrmRefineIterFinalDir, r"Base_r_%.5f/weight.pfm")
+                        refineNrmDiffWeight = os.path.join(nrmRefineIterFinalDir, r"Base_diffuse/weight.pfm")
 
-                    re = subprocess.run(
-                        ["CapTexCombine",
-                         "-viewFramesDirectory=" + viewRecNrmDir,
-                         "-viewNrmImgFile=" + viewNrmImgFile, "-viewGeoNrmImgFile=" + viewGeoNrmImgFile,"-viewDistImgFile=" + viewDistImgFile,
-                         "-viewTexCoordImgFile=" + viewTexCoordImgFile,
-                         "-viewDiffWeightFile=" + refineNrmDiffWeight, "-viewSpecRouWeightFile=" + refineNrmRouWeight,
-                         "-genericRoughnesses=" + genericRoughnesses,
-                         "-texNrmImgFile=" + texNrmImgFile,
-                         "-texPosImgFile=" + texPosImgFile,
-                         "-texDiffImgFile=" + texDiffImgFile,
-                         "-texSpecRouImgFile=" + texSpecRouImgFile,
-                         "-viewMaskImgFile=" + viewMaskImgFile, "-nViews=" + nViews, "-uvWidth=" + texWidth,
-                         "-uvHeight=" + texHeight,
-                         "-srcModelFile=" + reModelUV, "-tarModelFile=" + reModelUpt, "-flipZ", "--solveRou",
-                         "-texSpecFitImgFile=" + texSpecFitImgFile, "-texRouFitImgFile=" + texRouFitImgFile,
-                         "-cameraConfig=" + cameraConfig, "-cameraExtrin=" + cameraExtrinsic,
-                         "-viewScale=" + viewScale
-                         ], stdout=True, stderr=True, check=True)
+                        texNrmImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "TexNrm.pfm")
+                        texPosImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "TexPos.pfm")
+                        texDiffImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", r"Base_diffuse/weight.pfm")
+                        texSpecRouImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", r"Base_r_%.5f/weight.pfm")
+                        texSpecFitImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "result_specular.pfm")
+                        texRouFitImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "result_roughness_fitted.pfm")
 
-                    logger.info("Update normal")
-                    re = subprocess.run(
-                        ["CapUpdateNrm",
-                         "-texNrmImgFile=" + texNrmImgFile,
-                         "-srcModelFile=" + reModelUV, "-tarModelFile=" + reModelUpt, "-flipZ", "-merge"
-                         ], stdout=True, stderr=True, check=True)
+                        re = subprocess.run(
+                            ["CapTexCombine",
+                             "-viewFramesDirectory=" + viewRecNrmDir,
+                             "-viewNrmImgFile=" + viewNrmImgFile, "-viewGeoNrmImgFile=" + viewGeoNrmImgFile,"-viewDistImgFile=" + viewDistImgFile,
+                             "-viewTexCoordImgFile=" + viewTexCoordImgFile,
+                             "-viewDiffWeightFile=" + refineNrmDiffWeight, "-viewSpecRouWeightFile=" + refineNrmRouWeight,
+                             "-genericRoughnesses=" + genericRoughnesses,
+                             "-texNrmImgFile=" + texNrmImgFile,
+                             "-texPosImgFile=" + texPosImgFile,
+                             "-texDiffImgFile=" + texDiffImgFile,
+                             "-texSpecRouImgFile=" + texSpecRouImgFile,
+                             "-viewMaskImgFile=" + viewMaskImgFile, "-nViews=" + nViews, "-uvWidth=" + texWidth,
+                             "-uvHeight=" + texHeight,
+                             "-srcModelFile=" + reModelUV, "-tarModelFile=" + reModelUpt, "-flipZ", "--solveRou",
+                             "-texSpecFitImgFile=" + texSpecFitImgFile, "-texRouFitImgFile=" + texRouFitImgFile,
+                             "-cameraConfig=" + cameraConfig, "-cameraExtrin=" + cameraExtrinsic,
+                             "-viewScale=" + viewScale
+                             ], stdout=True, stderr=True, check=True)
 
-                    logger.info("Change obj into ply")
-                    # mesh.export(plyFile, "ply", encoding='ascii', vertex_normal=True)
-                    obj2ply(reModelUpt, reModelUptPly)
+                        logger.info("Update normal")
+                        re = subprocess.run(
+                            ["CapUpdateNrm",
+                             "-texNrmImgFile=" + texNrmImgFile,
+                             "-srcModelFile=" + reModelUV, "-tarModelFile=" + reModelUpt, "-flipZ", "-merge"
+                             ], stdout=True, stderr=True, check=True)
 
-                    re = subprocess.run(
-                        ["mesh_opt", reModelUptPly,"-lambda", "0.01", "norm:"+ reModelFinal], stdout=True, stderr=True, check=True)
-                    ply2obj(reModelFinal,reModelFinalObj)
+                        logger.info("Change obj into ply")
+                        # mesh.export(plyFile, "ply", encoding='ascii', vertex_normal=True)
+                        obj2ply(reModelUpt, reModelUptPly)
 
-                    # reModelFinalPoission = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverFinalPoission.ply")
-                    # reModelFinalTrim = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverFinalTrim.ply")
-                    #
-                    # re = subprocess.run(
-                    #     ["PoissonRecon.exe", "--in", reModelFinal, "--out", reModelFinalPoission, "--normals", "--pointWeight",
-                    #      "0",
-                    #      "--depth",
-                    #      "10", "--density", "--threads", "2"], stdout=True, stderr=True,
-                    #     check=True)
-                    # # trim combined mesh
-                    # re = subprocess.run(
-                    #     ["SurfaceTrimmer.exe", "--in", reModelFinalPoission, "--out", reModelFinalTrim, "--trim", "7"],
-                    #     stdout=True, stderr=True, check=True)
+                        re = subprocess.run(
+                            ["mesh_opt", reModelUptPly,"-lambda", "0.1", "norm:"+ reModelFinal], stdout=True, stderr=True, check=True)
+                        ply2obj(reModelFinal,reModelFinalObj)
+
+                        # re = subprocess.run(
+                        #     ["PoissonRecon.exe", "--in", reModelFinal, "--out", reModelFinalPoission, "--normals", "--pointWeight",
+                        #      "0",
+                        #      "--depth",
+                        #      "10", "--density", "--threads", "2"], stdout=True, stderr=True,
+                        #     check=True)
+                        # # trim combined mesh
+                        # re = subprocess.run(
+                        #     ["SurfaceTrimmer.exe", "--in", reModelFinalPoission, "--out", reModelFinalTrim, "--trim", "6"],
+                        #     stdout=True, stderr=True, check=True)
+
+                shutil.move(lastIterModel,finalIterModel)
 
             if MeshOptSecond:
-                meshFinalOptDir = reModel = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt")
+                meshFinalOptDir = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt")
                 if not os.path.exists(meshFinalOptDir):
                     os.makedirs(meshFinalOptDir)
                 # when mesh_opt finished, combine all textures together using new uv
                 reModel = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverFinal.obj")
                 reModelR = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "RecoverR.obj")
                 reModelUV = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "RecoverUV.obj")
-
+                reModelFinalObjFlip = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt\Object",
+                                                   "RecoverFinalFlip.obj")
                 if MeshOptSecondPreprocess:
                     logger.info("Preprocess model ")
                     # remove degenerated faces
@@ -1270,31 +1290,45 @@ if __name__ == "__main__":
                     logger.info("UVAtlas ")
                     # UVAtlas parameterization
                     re = subprocess.run(
-                        ["UVAtlas", "-iv", "TEXCOORD", "-w", texWidth, "-h", texHeight, "-t", "-y", "-o", reModelUV,
+                        ["UVAtlas", "-iv", "TEXCOORD", "-w", texWidth, "-h", texHeight, "-y", "-o", reModelUV,
                          reModelR],
                         stdout=True, stderr=True, check=True)
 
                     logger.info("Project recovered model into each view:")
-                    startView = 0
-                    for v in range(startView, nViewsCount):
-                        logger.info("Dealing view: {0}th".format(v))
-                        modelFile = reModelUV
-                        viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d" % v)
-                        framesDirectory = os.path.join(viewDirectory, "Frames")
-
+                    CapMultiSimOption = 1
+                    if CapMultiSimOption:
+                        viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
                         nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
                         nrmRefineFramesDirectory = os.path.join(nrmRefineDirectory, "FramesFinal")
-
-                        cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt" % v)
+                        cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt")
                         renderOption = "2"
                         re = subprocess.run(
-                            ["CapSim", "-framesDirectory=" + nrmRefineFramesDirectory, "-modelFile=" + modelFile,
+                            ["CapMultiSim", "-framesDirectory=" + nrmRefineFramesDirectory, "-modelFile=" + reModelUV,
                              "-cameraConfig=" + cameraConfig, "-cameraExtrin=" + cameraExtrinsic,
                              "-viewScale=" + viewScale, "-flipZ",
-                             "-renderOption=" + renderOption],
+                             "-renderOption=" + renderOption, "-nViews=" + nViews],
                             stdout=True, stderr=True, check=True)
 
-                if MeshOptCapNrmCombine:
+                    # startView = 0
+                    # for v in range(startView, nViewsCount):
+                    #     logger.info("Dealing view: {0}th".format(v))
+                    #     modelFile = reModelUV
+                    #     viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d" % v)
+                    #     framesDirectory = os.path.join(viewDirectory, "Frames")
+                    #
+                    #     nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
+                    #     nrmRefineFramesDirectory = os.path.join(nrmRefineDirectory, "FramesFinal")
+                    #
+                    #     cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt" % v)
+                    #     renderOption = "2"
+                    #     re = subprocess.run(
+                    #         ["CapSim", "-framesDirectory=" + nrmRefineFramesDirectory, "-modelFile=" + modelFile,
+                    #          "-cameraConfig=" + cameraConfig, "-cameraExtrin=" + cameraExtrinsic,
+                    #          "-viewScale=" + viewScale, "-flipZ",
+                    #          "-renderOption=" + renderOption],
+                    #         stdout=True, stderr=True, check=True)
+
+                if MeshOptSecondCapNrmCombine:
                     # combine all views' nrm into uv texture
                     logger.info("CapTexCombine: combine into texture space ")
                     viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
@@ -1329,7 +1363,7 @@ if __name__ == "__main__":
                     reModelUptPly = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "RecoverUpdate.ply")
                     reModelFinal = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "RecoverFinal.ply")
                     reModelFinalObj = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "RecoverFinal.obj")
-                    reModelFinalObjFlip = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt\Object","RecoverFinalFlip.obj")
+
 
                     re = subprocess.run(
                         ["CapTexCombine",
@@ -1384,7 +1418,7 @@ if __name__ == "__main__":
                     re = subprocess.run(
                         ["CapBRDFCombine",
                          "-viewFramesDirectory=" + viewRecNrmDir,
-                         "-viewNrmImgFile=" + viewNrmImgFile, "-viewDistImgFile=" + viewDistImgFile,
+                         "-viewNrmImgFile=" + viewGeoNrmImgFile, "-viewDistImgFile=" + viewDistImgFile,
                          "-viewTexCoordImgFile=" + viewTexCoordImgFile,
                          "-viewDiffWeightFile=" + refineNrmDiffWeight, "-viewSpecRouWeightFile=" + refineNrmRouWeight,
                          "-genericRoughnesses=" + genericRoughnesses,
@@ -1403,22 +1437,37 @@ if __name__ == "__main__":
                     if not os.path.exists(os.path.dirname(reModelFinalObjFlip)):
                         os.makedirs(os.path.dirname(reModelFinalObjFlip))
 
-                FitRouOption = 1
                 if FitRouOption:
-                    # meshUpt = trimesh.load(reModelUpt)
-                    # meshRefined = trimesh.load(reModelFinal)
-                    # meshUpt.vertices = meshRefined.vertices
-                    # #after UVAtlas, vertices size is not consistent with vertex_texture
-                    # A = meshUpt.metadata['vertex_texture'][0:len(meshUpt.vertices)]
-                    # meshUpt.metadata['vertex_texture'] = A
-                    # print(meshUpt.vertex_normals)
-                    # ex.export_mesh(meshUpt,reModelFinalObj,file_type="obj",include_normals=True,include_texture=True)
-                    logger.info("Create model: ")
-                    re = subprocess.run(
-                        ["ModelTool",
-                         "-srcModelFile=" + reModelUpt, "-tarModelFile=" + reModelFinalObjFlip, "-flipZ","--flipVC","-tarTex",
-                         "-tarTexDiffFile=" + texDiffImgFile, "-tarTexSpecFile=" + texSpecFitImgFile, "-tarTexRouFile="+texRouFitImgFile
-                         ], stdout=True, stderr=True, check=True)
+                   # logger.info("Create model: ")
+                    # re = subprocess.run(
+                    #     ["ModelTool",
+                    #      "-srcModelFile=" + reModelUpt, "-tarModelFile=" + reModelFinalObjFlip, "-flipZ","--flipVC","-tarTex",
+                    #      "-tarTexDiffFile=" + texDiffImgFile, "-tarTexSpecFile=" + texSpecFitImgFile, "-tarTexRouFile="+texRouFitImgFile
+                    #      ], stdout=True, stderr=True, check=True)
+                    logger.info("Dilate textures: ")
+                    CapDilateTextureOption = 1
+                    if CapDilateTextureOption:
+                        # dilate texture
+                        inputDir= os.path.dirname(reModelFinalObjFlip)
+                        nDil = "2"
+                        inputFile = os.path.join(inputDir, "result_diff.pfm")
+                        outputFile = os.path.join(inputDir, "result_diff.pfm")
+                        re = subprocess.run(
+                            ["ImgDilator", "-in=" + inputFile, "-out=" + outputFile], stdout=True, stderr=True,
+                            check=True)
+
+                        inputFile = os.path.join(inputDir, "result_spec.pfm")
+                        outputFile = os.path.join(inputDir, "result_spec.pfm")
+                        re = subprocess.run(
+                            ["ImgDilator", "-in=" + inputFile, "-out=" + outputFile], stdout=True, stderr=True,
+                            check=True)
+
+                        inputFile = os.path.join(inputDir, "result_roughness.pfm")
+                        outputFile = os.path.join(inputDir, "result_roughness.pfm")
+                        re = subprocess.run(
+                            ["ImgDilator", "-in=" + inputFile, "-out=" + outputFile], stdout=True, stderr=True,
+                            check=True)
+
 
         finally:
             os.environ.clear()
