@@ -119,20 +119,27 @@ if __name__ == "__main__":
         # re = subprocess.run(
         #     ["ImgDilator", "-in=" + inputFile, "-out=" + outputFile], stdout=True, stderr=True, check=True)
 
-        inputFile = os.path.join(inputDir,"result_diff.pfm")
-        outputFile = os.path.join(inputDir,"result_diff.pfm")
-        re = subprocess.run(
-        ["ImgDilator", "-in="+inputFile,"-out="+outputFile], stdout=True, stderr=True, check=True)
+        # inputFile = os.path.join(inputDir,"result_diff.pfm")
+        # outputFile = os.path.join(inputDir,"result_diff.pfm")
+        # re = subprocess.run(
+        # ["ImgDilator", "-in="+inputFile,"-out="+outputFile], stdout=True, stderr=True, check=True)
+        #
+        # inputFile = os.path.join(inputDir, "result_spec.pfm")
+        # outputFile = os.path.join(inputDir, "result_spec.pfm")
+        # re = subprocess.run(
+        #     ["ImgDilator", "-in=" + inputFile, "-out=" + outputFile], stdout=True, stderr=True, check=True)
+        #
+        # inputFile = os.path.join(inputDir, "result_roughness.pfm")
+        # outputFile = os.path.join(inputDir, "result_roughness.pfm")
+        # re = subprocess.run(
+        #     ["ImgDilator", "-in=" + inputFile, "-out=" + outputFile], stdout=True, stderr=True, check=True)
 
-        inputFile = os.path.join(inputDir, "result_spec.pfm")
-        outputFile = os.path.join(inputDir, "result_spec.pfm")
+        inputDir = r"D:\v-jiazha\10-share\Box-blend"
+        inputFile = os.path.join(inputDir, "result_diff.pfm")
+        outputFile = os.path.join(inputDir, "result_diff_dil.pfm")
         re = subprocess.run(
             ["ImgDilator", "-in=" + inputFile, "-out=" + outputFile], stdout=True, stderr=True, check=True)
 
-        inputFile = os.path.join(inputDir, "result_roughness.pfm")
-        outputFile = os.path.join(inputDir, "result_roughness.pfm")
-        re = subprocess.run(
-            ["ImgDilator", "-in=" + inputFile, "-out=" + outputFile], stdout=True, stderr=True, check=True)
     finally:
         os.environ.clear()
         os.environ.update(_environ)

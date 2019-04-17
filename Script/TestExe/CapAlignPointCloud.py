@@ -37,10 +37,10 @@ def _logpath(path, names):
 if __name__ == "__main__":
 
     ImageMagicPath = r"C:/Program Files/ImageMagick-7.0.8-Q16-HDRI"
-    BUILD_ROOT = r"D:\1-workspace\Source\ObjectCap\x64\Release"
-    TOOL_ROOT = r"D:\4-projects\5-LED\2-Source\2-3rdTool"
-    DATA_ROOT = r"D:\4-projects\5-LED\2-Source\4-MVS"
-    TOOL_LCT_ROOT = r"D:\4-projects\5-LED\2-Source\2-3rdTool\LCT"
+    BUILD_ROOT = r"D:\v-jiazha\2-workspaces\Source\ObjectCap\x64\Release"
+    TOOL_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\2-3rdTool"
+    DATA_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
+    TOOL_LCT_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\2-3rdTool\LCT"
     COMMON_ROOT = os.path.join(DATA_ROOT, r'RealCommon')
     CONFIG_ROOT = os.path.join(COMMON_ROOT,r"Config0301")
 
@@ -99,9 +99,9 @@ if __name__ == "__main__":
     _environ = dict(os.environ)
     try:
         if 'PATH' in _environ:
-            os.environ['PATH'] = os.environ['PATH'] + ";" + BUILD_ROOT
+            os.environ['PATH'] = os.environ['PATH'] + ";" + BUILD_ROOT + ";" + TOOL_ROOT + ";" + TOOL_LCT_ROOT
         else:
-            os.environ['PATH'] = BUILD_ROOT
+            os.environ['PATH'] = BUILD_ROOT + ";" + TOOL_ROOT + ";" + TOOL_LCT_ROOT
 
         viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
 
@@ -118,17 +118,48 @@ if __name__ == "__main__":
 
         nrmRefRecDir  = os.path.join(OBJECT_ROOT, r"Recover\Model\NrmRefine", nrmRefRecDirName)
 
-        src1Model = os.path.join(r"D:\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-oatmeal\Recover\Model\FinalOpt", "RecoverUpdate.obj")
-        src2Model = os.path.join(r"D:\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-oatmeal\Recover\Model\FinalOpt", "RecoverUpdate.obj")
-        tarModel = os.path.join(r"D:\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-oatmeal\Recover\Model\FinalOpt", "Recover_UpdateAlign.obj")
-        keyPointsFile1 =  os.path.join(r"D:\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-oatmeal\Recover\Model\FinalOpt","keyPoints.txt")
-        keyPointsFile2 = os.path.join(r"D:\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-oatmeal\Recover\Model\FinalOpt","keyPoints2.txt")
+        src1Model = os.path.join(r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookies\Recover\Model\FinalOpt", "RecoverUpdate.obj")
+        src2Model = os.path.join(r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookies2\Recover\Model\FinalOpt", "RecoverUpdate.obj")
+        tarModel = os.path.join(r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookies\Recover\Model\FinalOpt", "Recover_UpdateAlign.obj")
+        alighModelPly = os.path.join(r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookies\Recover\Model\FinalOpt", "Recover_UpdateAlign.ply")
+        alighModelPoiPly = os.path.join(
+            r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookies\Recover\Model\FinalOpt",
+            "Recover_UpdateAlign_poi.ply")
+        alighModelTrimPly = os.path.join(
+            r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookies\Recover\Model\FinalOpt",
+            "Recover_UpdateAlign_trim.ply")
+
+
+        keyPointsPosFile1 = os.path.join(
+            r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookies\Recover\Model\FinalOpt",
+            "keyPointsPos.txt")
+
+        keyPointsPosFile2 = os.path.join(
+            r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookies2\Recover\Model\FinalOpt",
+            "keyPointsPos.txt")
+
+        transExtrinFile = os.path.join(
+            r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookies2\Recover\Model\FinalOpt",
+            "transExtrin.txt")
 
         re = subprocess.run(
             ["CapAlignPointCloud","-src1ModelFile=" + src1Model, "-src2ModelFile=" + src2Model,
-             "-keyPointsFile1=" + keyPointsFile1,
-             "-keyPointsFile2=" + keyPointsFile2, "-tarModelFile=" + tarModel,
+             "-keyPointsFile1=" + keyPointsPosFile1,
+             "-keyPointsFile2=" + keyPointsPosFile2, "-tarModelFile=" + tarModel, "-transExtrin=" + transExtrinFile,
             "-viewScale=" + viewScale,"-flipZ","-nViews="+nViews],
+            stdout=True, stderr=True, check=True)
+
+        obj2ply(tarModel,alighModelPly)
+
+        re = subprocess.run(
+            ["PoissonRecon.exe", "--in", alighModelPly, "--out", alighModelPoiPly, "--normals", "--pointWeight",
+             "0",
+             "--depth",
+             "10", "--density", "--threads", "2"], stdout=True, stderr=True,
+            check=True)
+        # trim combined mesh
+        re = subprocess.run(
+            ["SurfaceTrimmer.exe", "--in", alighModelPoiPly, "--out", alighModelTrimPly, "--trim", "6"],
             stdout=True, stderr=True, check=True)
 
 

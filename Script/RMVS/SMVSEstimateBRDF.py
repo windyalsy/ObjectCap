@@ -46,11 +46,12 @@ if __name__ == "__main__":
     CONFIG_ROOT = os.path.join(COMMON_ROOT,r"Config0301")
 
     # OBJECT = r"RealObject-pig2"
-    # OBJECT = r"RealObject-penrack3"
+    OBJECT = r"RealObject-penrack3"
     # OBJECT = r"RealObject-pig2"
     # OBJECT = r"RealObject-oatmeal"
-    OBJECT = r"RealObject-cookies"
-    OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object', OBJECT)
+    # OBJECT = r"RealObject-cookies"
+    OBJECT_ROOT = r"C:\v-jiazha\RealObject-penrack3"
+    # OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object', OBJECT)
     OBJECT_ViewDir = os.path.join(OBJECT_ROOT, "Views","View_%04d")
     OBJECT_CalibPrismDir = os.path.join(OBJECT_ROOT, "CalibPrism")
 
@@ -116,8 +117,9 @@ if __name__ == "__main__":
 
         BRDFOptDirName = "FinalOpt2"
         modelName = "Recover"
-        meshComReconTrimFObj = os.path.join(OBJECT_ROOT, r"Recover\Model\Combine", "{0}.obj".format(modelName))
-        meshComReconTrimFObj = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookies\Recover\Model\FinalOpt\RecoverUpdate.obj"
+        # meshComReconTrimFObj = os.path.join(OBJECT_ROOT, r"Recover\Model\Combine", "{0}.obj".format(modelName))
+        # meshComReconTrimFObj = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookies\Recover\Model\FinalOpt\RecoverUpdate.obj"
+        reModelUpt = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "RecoverUpdate.obj")
         if not os.path.exists(OBJECT_ROOT):
             os.makedirs(OBJECT_ROOT)
         _environ = dict(os.environ)
@@ -131,7 +133,7 @@ if __name__ == "__main__":
             for v in range(startView, nViewsCount):
 
                 logger.info("Dealing view: {0}th".format(v))
-                modelFile = meshComReconTrimFObj
+                modelFile = reModelUpt
 
                 viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d" % v)
                 framesDirectory = os.path.join(viewDirectory, "Frames")
