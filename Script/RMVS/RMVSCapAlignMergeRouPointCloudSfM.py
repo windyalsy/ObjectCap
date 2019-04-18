@@ -40,6 +40,7 @@ if __name__ == "__main__":
     BUILD_ROOT = r"D:\v-jiazha\2-workspaces\Source\ObjectCap\x64\Release"
     TOOL_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\2-3rdTool"
     DATA_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
+    DATA_ROOT_E = r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
     TOOL_LCT_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\2-3rdTool\LCT"
     COMMON_ROOT = os.path.join(DATA_ROOT, r'RealCommon')
     CONFIG_ROOT = os.path.join(COMMON_ROOT,r"Config0301")
@@ -75,12 +76,12 @@ if __name__ == "__main__":
     OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model","FinalSfM")
 
     OBJECT1 = r"RealObject-cookies"
-    OBJECT_ROOT1 = os.path.join(DATA_ROOT, r'Object',OBJECT1)
+    OBJECT_ROOT1 = os.path.join(DATA_ROOT_E, r'Object',OBJECT1)
     OBJECT_ViewDir1 = os.path.join(OBJECT_ROOT1, "Views", "View_%04d")
     OBJECT_Model_Dir1 = os.path.join(OBJECT_ROOT1, "Recover", "Model","FinalOpt")
 
     OBJECT2 = r"RealObject-cookies2"
-    OBJECT_ROOT2 = os.path.join(DATA_ROOT, r'Object',OBJECT2)
+    OBJECT_ROOT2 = os.path.join(DATA_ROOT_E, r'Object',OBJECT2)
     OBJECT_ViewDir2 = os.path.join(OBJECT_ROOT2, "Views", "View_%04d")
     OBJECT_Model_Dir2 = os.path.join(OBJECT_ROOT2, "Recover", "Model","FinalOpt")
 
@@ -89,12 +90,12 @@ if __name__ == "__main__":
     cameraConfig2 = os.path.join(CONFIG_ROOT, "Setup" + OBJECT2, "cameraConfig.txt")
 
     # Camera extrinsic, scale setting
-    viewScale = "0.009"
-    # viewScale = "1"
-    # cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "ColmapSfM", "Extrinsic")
-    # cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "ColmapSfM", "Extrinsic")
-    cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "CalibPrism", "Extrinsic")
-    cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "CalibPrism", "Extrinsic")
+    # viewScale = "0.009"
+    viewScale = "1"
+    cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "ColmapSfM", "Extrinsic")
+    cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "ColmapSfM", "Extrinsic")
+    # cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "CalibPrism", "Extrinsic")
+    # cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "CalibPrism", "Extrinsic")
 
     # keyPointsUVFile1 = os.path.join(OBJECT_Model_Dir_MERGE,"keyPointsUV1.txt")
     # keyPointsUVFile2 = os.path.join(OBJECT_Model_Dir_MERGE,"keyPointsUV2.txt")
@@ -110,14 +111,16 @@ if __name__ == "__main__":
     nrmRefRecDirName1 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=1_dptWeight=1_fDistTH=0.5_nDptIters=1"
     nrmRefRecDirName2 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=10_dptWeight=10_fDistTH=1_nDptIters=1"
 
-    src1Model = os.path.join(OBJECT_ROOT1,"Recover/Model/NrmRefine",nrmRefRecDirName1,"Comb_refine_.obj")
-    src2Model = os.path.join(OBJECT_ROOT2,"Recover/Model/NrmRefine",nrmRefRecDirName2,"Comb_refine_.obj")
+    # src1Model = os.path.join(OBJECT_ROOT1,"Recover/Model/NrmRefine",nrmRefRecDirName1,"Comb_refine_.obj")
+    # src2Model = os.path.join(OBJECT_ROOT2,"Recover/Model/NrmRefine",nrmRefRecDirName2,"Comb_refine_.obj")
     # src1Model = os.path.join(OBJECT_Model_Dir1,"RecoverUpdate.obj")
     # src2Model = os.path.join(OBJECT_Model_Dir2,"RecoverUpdate.obj")
-    alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.obj")
-    # alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"fused.obj")
-    alignModelPly = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.ply")
-    # alignModelPly = os.path.join(OBJECT_Model_Dir_MERGE,"fused.ply")
+
+    alignColmapModel = os.path.join(OBJECT_Model_Dir_MERGE,"fused.obj")
+    # alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.obj")
+    alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"fusedFlip.obj")
+    # alignModelPly = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.ply")
+    alignModelPly = os.path.join(OBJECT_Model_Dir_MERGE,"fusedFlip.ply")
     alignModelPoi = os.path.join(OBJECT_Model_Dir_MERGE,"Align_Poi.ply")
     alignModelTrim = os.path.join(OBJECT_Model_Dir_MERGE,"Align_Trim.ply")
     alignModelRec = os.path.join(OBJECT_Model_Dir_MERGE,"Recover.obj")
@@ -125,7 +128,7 @@ if __name__ == "__main__":
 
     # Option setting
     CapAlignPointCloudOpt = 1
-    CleanPointCloudOption = 1
+    CleanPointCloudOption = 0
     logger.info("Start merging objects:")
     if not os.path.exists( OBJECT_Model_Dir_MERGE):
         os.makedirs( OBJECT_Model_Dir_MERGE)
@@ -141,15 +144,19 @@ if __name__ == "__main__":
             cameraExtrinsic1 = os.path.join(cameraExtrinDirectory1, "view_%04d.txt")
             cameraExtrinsic2 = os.path.join(cameraExtrinDirectory2, "view_%04d.txt")
 
+            # re = subprocess.run(
+            #     ["CapTwoSeqTrans", "-src1ModelFile=" + src1Model, "-src2ModelFile=" + src2Model,
+            #      "-tarModelFile=" + alignModel,
+            #      "-cameraExtrin1=" + cameraExtrinsic1,
+            #      "-cameraExtrin2=" + cameraExtrinsic2,
+            #      "-transExtrin=" + transExtrinFile,
+            #      "-viewScale=" + viewScale, "-flipZ", "-nViews=" + nViews],
+            #     stdout=True, stderr=True, check=True)
+            #
+            # from ColMap: model need to be flipped
             re = subprocess.run(
-                ["CapTwoSeqTrans", "-src1ModelFile=" + src1Model, "-src2ModelFile=" + src2Model,
-                 "-tarModelFile=" + alignModel,
-                 "-cameraExtrin1=" + cameraExtrinsic1,
-                 "-cameraExtrin2=" + cameraExtrinsic2,
-                 "-transExtrin=" + transExtrinFile,
-                 "-viewScale=" + viewScale, "-flipZ", "-nViews=" + nViews],
+                ["ModelConvert.exe", "-srcModelFile=" + alignColmapModel, "-tarModelFile=" + alignModel, "-flipZ", "-flipY"],
                 stdout=True, stderr=True, check=True)
-
             obj2ply(alignModel, alignModelPly)
             logger.info("PoissonRecon: ")
             re = subprocess.run(
@@ -160,7 +167,7 @@ if __name__ == "__main__":
                 check=True)
             # trim combined mesh
             re = subprocess.run(
-                ["SurfaceTrimmer.exe", "--in", alignModelPoi, "--out", alignModelTrim, "--trim", "4"],
+                ["SurfaceTrimmer.exe", "--in", alignModelPoi, "--out", alignModelTrim, "--trim", "6"],
                 stdout=True, stderr=True, check=True)
             ply2obj(alignModelTrim,alignModelRec)
             shutil.copy(alignModelRec,meshFinalDirObj)
@@ -193,9 +200,9 @@ if __name__ == "__main__":
             # combined
             for iter in range(clean_nIters):
                 logger.info("Iter: {} ".format(iter) )
-                viewIterDir1 = os.path.join(viewDirectory1,"Iter_Clean_Merge","Iter_%04d" % iter)
+                viewIterDir1 = os.path.join(viewMeshCleanDir1,"Iter_%04d" % iter)
                 viewIterFramesDir1 = os.path.join(viewIterDir1, "Frames")
-                viewIterDir2 = os.path.join(viewDirectory2,"Iter_Clean_Merge","Iter_%04d" % iter)
+                viewIterDir2 = os.path.join(viewMeshCleanDir2,"Iter_%04d" % iter)
                 viewIterFramesDir2 = os.path.join(viewIterDir2, "Frames")
 
                 cleanModel = os.path.join(iterDir,"Iter_%04d_clean.obj")

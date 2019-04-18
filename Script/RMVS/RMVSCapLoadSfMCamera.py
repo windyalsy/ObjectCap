@@ -40,6 +40,7 @@ if __name__ == "__main__":
     BUILD_ROOT = r"D:\v-jiazha\2-workspaces\Source\ObjectCap\x64\Release"
     TOOL_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\2-3rdTool"
     DATA_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
+    # DATA_ROOT_E = r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
     TOOL_LCT_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\2-3rdTool\LCT"
     COMMON_ROOT = os.path.join(DATA_ROOT, r'RealCommon')
     CONFIG_ROOT = os.path.join(COMMON_ROOT,r"Config0301")
@@ -72,22 +73,24 @@ if __name__ == "__main__":
 
     OBJECT_MERGE = r"RealObject-cookiesMerge"
     OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object',OBJECT_MERGE)
-    OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfMCookie')
+    OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfM')
     OBJECT_ROOT_MERGE_SFM_CONFIG = os.path.join(OBJECT_ROOT_MERGE_SFM,'SfMConfig')
+    # OBJECT_ROOT_MERGE_SFM_CONFIG = os.path.join(OBJECT_ROOT_MERGE_SFM,'sparse')
     OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model","Final")
 
     # nCount = "2"
     # OBJECT_LIST = "RealObject-cookies,RealObject-cookies2"
 
-    nCount = "1"
-    OBJECT_LIST = "RealObject-cookies"
+    nCount = "2"
+    OBJECTS = ["RealObject-cookies","RealObject-cookies2"]
+    OBJECT_LIST = ','.join(OBJECTS)
 
     OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object',"%s")
     OBJECT_ViewDir = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
     OBJECT_Model_Dir = os.path.join(OBJECT_ROOT, "Recover", "Model","FinalOpt")
 
     # Camera extrinsic, scale setting
-    viewScale = "0.009"
+    viewScale = "1"
     cameraExtrinDirectory = os.path.join(OBJECT_ROOT, "ColmapSfM", "Extrinsic")
 
 

@@ -40,6 +40,7 @@ if __name__ == "__main__":
     BUILD_ROOT = r"D:\v-jiazha\2-workspaces\Source\ObjectCap\x64\Release"
     TOOL_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\2-3rdTool"
     DATA_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
+    DATA_ROOT_E = r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
     TOOL_LCT_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\2-3rdTool\LCT"
     COMMON_ROOT = os.path.join(DATA_ROOT, r'RealCommon')
     CONFIG_ROOT = os.path.join(COMMON_ROOT,r"Config0301")
@@ -73,16 +74,16 @@ if __name__ == "__main__":
 
     OBJECT_MERGE = r"RealObject-cookiesMerge"
     OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object',OBJECT_MERGE)
-    OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model","Final")
+    OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model","FinalSfM")
     OBJECT_Model_Dir_MERGE_OPT = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model", "FinalOpt")
 
     OBJECT1 = r"RealObject-cookies"
-    OBJECT_ROOT1 = os.path.join(DATA_ROOT, r'Object',OBJECT1)
+    OBJECT_ROOT1 = os.path.join(DATA_ROOT_E, r'Object',OBJECT1)
     OBJECT_ViewDir1 = os.path.join(OBJECT_ROOT1, "Views", "View_%04d")
     OBJECT_Model_Dir1 = os.path.join(OBJECT_ROOT1, "Recover", "Model","FinalOpt")
 
     OBJECT2 = r"RealObject-cookies2"
-    OBJECT_ROOT2 = os.path.join(DATA_ROOT, r'Object',OBJECT2)
+    OBJECT_ROOT2 = os.path.join(DATA_ROOT_E, r'Object',OBJECT2)
     OBJECT_ViewDir2 = os.path.join(OBJECT_ROOT2, "Views", "View_%04d")
     OBJECT_Model_Dir2 = os.path.join(OBJECT_ROOT2, "Recover", "Model","FinalOpt")
 
@@ -91,9 +92,12 @@ if __name__ == "__main__":
     cameraConfig2 = os.path.join(CONFIG_ROOT, "Setup" + OBJECT2, "cameraConfig.txt")
 
     # Camera extrinsic, scale setting
-    viewScale = "0.009"
-    cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "CalibPrism", "Extrinsic")
-    cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "CalibPrism", "Extrinsic")
+    # viewScale = "0.009"
+    viewScale = "1"
+    # cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "CalibPrism", "Extrinsic")
+    # cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "CalibPrism", "Extrinsic")
+    cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "ColmapSfM", "Extrinsic")
+    cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "ColmapSfM", "Extrinsic")
 
     keyPointsUVFile1 = os.path.join(OBJECT_Model_Dir_MERGE,"keyPointsUV1.txt")
     keyPointsUVFile2 = os.path.join(OBJECT_Model_Dir_MERGE,"keyPointsUV2.txt")
@@ -101,18 +105,16 @@ if __name__ == "__main__":
     keyPointsPosFile2 = os.path.join(OBJECT_Model_Dir_MERGE,"keyPointsPos2.txt")
 
     # tranform second point cloud into the first one
-    transExtrinFile = os.path.join(OBJECT_Model_Dir_MERGE,"transExtrin.txt")
+    # transExtrinFile = os.path.join(OBJECT_Model_Dir_MERGE,"transExtrin.txt")
+    transExtrinFile = os.path.join(OBJECT_Model_Dir_MERGE,"transExtrinIdentity.txt")
 
-    src1Model = os.path.join(OBJECT_Model_Dir1,"RecoverUpdate.obj")
-    src2Model = os.path.join(OBJECT_Model_Dir2,"RecoverUpdate.obj")
-    alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.obj")
-    alignModelPly = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.ply")
-    alignModelPoi = os.path.join(OBJECT_Model_Dir_MERGE,"Align_Poi.ply")
-    alignModelTrim = os.path.join(OBJECT_Model_Dir_MERGE,"Align_Trim.ply")
 
     # refine normal MVS setting
-    nrmRefRecDirName1 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=1_dptWeight=1_fDistTH=0.5_nDptIters=1"
-    nrmRefRecDirName2 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=10_dptWeight=10_fDistTH=1_nDptIters=1"
+    # nrmRefRecDirName1 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=1_dptWeight=1_fDistTH=0.5_nDptIters=1"
+    # nrmRefRecDirName1 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=10_dptWeight=10_fDistTH=1_nDptIters=2"
+    # nrmRefRecDirName2 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=10_dptWeight=10_fDistTH=1_nDptIters=1"
+    nrmRefRecDirName1 = "ColmapSfM"
+    nrmRefRecDirName2 = "ColmapSfM"
 
     # Option setting
 
@@ -128,7 +130,7 @@ if __name__ == "__main__":
 
         FinalMeshOpt = 1
         if FinalMeshOpt:
-            MeshOpt = 0
+            MeshOpt = 1
             MeshOptPreprocess = 1
             MeshOptCapNrmCombine = 1
             MeshOptSecond = 1
@@ -137,7 +139,7 @@ if __name__ == "__main__":
             FitRouOption = 1
             texWidth = "1024"
             texHeight = "1024"
-            edgeLength = "0.001"
+            edgeLength = "0.003"
             meshOpt_nIter = 2
 
             # MODEL_ROOT = os.path.join(OBJECT_ROOT, r"Recover\Model")

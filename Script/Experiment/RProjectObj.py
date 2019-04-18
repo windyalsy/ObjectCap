@@ -40,6 +40,7 @@ if __name__ == "__main__":
     BUILD_ROOT = r"D:\v-jiazha\2-workspaces\Source\ObjectCap\x64\Release"
     TOOL_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\2-3rdTool"
     DATA_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
+    # DATA_ROOT_E = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
     TOOL_LCT_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\2-3rdTool\LCT"
     COMMON_ROOT = os.path.join(DATA_ROOT, r'RealCommon')
     CONFIG_ROOT = os.path.join(COMMON_ROOT,r"Config0301")
@@ -72,7 +73,7 @@ if __name__ == "__main__":
 
     OBJECT_MERGE = r"RealObject-cookiesMerge"
     OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object',OBJECT_MERGE)
-    OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfMCookie')
+    OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfM')
     OBJECT_ROOT_MERGE_SFM_CONFIG = os.path.join(OBJECT_ROOT_MERGE_SFM,'SfMConfig')
     OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model","Final")
 
@@ -93,14 +94,19 @@ if __name__ == "__main__":
     cameraConfig = os.path.join(CONFIG_ROOT, "Setup" + "%s", "cameraConfig.txt")
     poseConfig = os.path.join(CONFIG_ROOT, "Setup" + "%s", "poseConfig.txt")
 
+    # panelConfig = os.path.join(CONFIG_ROOT, "SetupOrigin", "panelConfig.txt")
+    # cameraConfig = os.path.join(CONFIG_ROOT, "SetupDownsample30", "cameraConfig.txt")
+    # poseConfig = os.path.join(CONFIG_ROOT, "SetupOrigin", "poseConfig.txt")
+
     # Camera extrinsic, scale setting
-    viewScale = "0.009"
+    # viewScale = "0.009"
+    viewScale= "1"
     cameraExtrinDirectory = os.path.join(OBJECT_ROOT, "ColmapSfM", "Extrinsic")
 
 
     alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.obj")
-    model = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookiesMerge\SfMCookie\fused.obj"
-    # model = r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookies\Recover\Model\Final\Recover.obj"
+    modelOrigin = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookiesMerge\SfM\denseRecon\fused.obj"
+    modelFlip = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookiesMerge\SfM\denseRecon\fusedFlip.obj"
 
     # Option setting
     CapLoadSfMCameraOpt = 1
@@ -118,11 +124,16 @@ if __name__ == "__main__":
         else:
             os.environ['PATH'] = BUILD_ROOT + ";" + TOOL_ROOT + ";" + TOOL_LCT_ROOT
 
+        re = subprocess.run(
+            ["ModelConvert.exe", "-srcModelFile=" + modelOrigin, "-tarModelFile=" + modelFlip, "-flipZ", "-flipY"],
+            stdout=True, stderr=True, check=True)
+
         CapMultiSimOption = 1
         if CapMultiSimOption:
             for i in range(nObjCount):
                 logger.info("CapMultiSim  object : {} ".format(i))
                 cameraConfigObj = cameraConfig % OBJECTS[i]
+                # cameraConfigObj = cameraConfig
                 cameraExtrinsic = os.path.join(cameraExtrinDirectory % OBJECTS[i], "view_%04d.txt")
                 viewDirectory = os.path.join(OBJECT_ROOT % OBJECTS[i], "Views", "View_%04d")
                 nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
@@ -130,9 +141,9 @@ if __name__ == "__main__":
                 renderOption = "2"
                 re = subprocess.run(
                     ["CapMultiSim", "-framesDirectory=" + viewExpFramesDir,
-                     "-modelFile=" + model,
+                     "-modelFile=" + modelFlip,
                      "-cameraConfig=" + cameraConfigObj, "-cameraExtrin=" + cameraExtrinsic,
-                     "-viewScale=" + viewScale, "-flipZ",
+                     "-viewScale=" + viewScale, "-flipZ","--flipY",
                      "-renderOption=" + renderOption, "-nViews=" + nViews],
                     stdout=True, stderr=True, check=True)
 
