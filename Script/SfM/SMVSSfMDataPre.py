@@ -21,14 +21,16 @@ if __name__ == "__main__":
     CONFIG_ROOT = os.path.join(COMMON_ROOT, r"Config0301")
 
     # OBJECT = r"RealObject-pig2"
-    # OBJECT = r"RealObject-penrack3"
+    OBJECT = r"RealObject-penrack3"
     # OBJECT = r"RealObject-pig2"
     # OBJECT = r"RealObject-oatmeal"
     # OBJECT = r"RealObject-oatmeal2"
-    OBJECT = r"RealObject-cookies"
+    # OBJECT = r"RealObject-cookies"
+    # OBJECT = r"RealObject-gift1"
+    # OBJECT = r"RealObject-gift2"
     # OBJECT = r"RealObject-cookies2"
-    # OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object', OBJECT)
     OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object', OBJECT)
+    # OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object', OBJECT)
     # OBJECT_ROOT = r"C:\v-jiazha\RealObject-penrack3"
     OBJECT_ViewDir = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
     OBJECT_CalibPrismDir = os.path.join(OBJECT_ROOT, "CalibPrism")
@@ -57,10 +59,21 @@ if __name__ == "__main__":
             nrmRefineFramesDirectory = os.path.join(nrmRefineDirectory, "FramesCombine")
             nrmRefineIterFinalDir = os.path.join(nrmRefineDirectory, "Iter", "Iter_final")
             diffWeight = os.path.join(nrmRefineIterFinalDir,"Base_diffuse","weight.pfm")
-            fullOn = os.path.join(framesDirectory,"origin_full.jpg")
-            # imageSrc = os.path.join(framesDirectory, imageSrcName)
+            featImg = os.path.join(nrmRefineIterFinalDir,"combineFeat.pfm")
+            nrmRecImg = os.path.join(nrmRefineIterFinalDir,"nrmR.pfm")
+            recNrmDirName = r"refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=1_dptWeight=1_fDistTH=0.1_nDptIters=1"
+            nrmInObj = os.path.join(nrmRefineDirectory,recNrmDirName,"nrmInObj.pfm")
+            # fullOn = os.path.join(framesDirectory,"origin_full.jpg")
+            # imageSrc = diffWeight
+            # imageSrc = featImg
+            # imageSrc = nrmRecImg
+            # imageSrc = fullOn
+            # imageSrc = nrmInObj
+            # imageSrcName = "result_r0001.pfm"
+            imageSrcName = "result_c0100.pfm"
+            imageSrc = os.path.join(framesDirectory, imageSrcName)
             imageTar = os.path.join(SfM_ImagesDir, "image%02d.jpg" % (v+1))
-            imageSrc = diffWeight
+
             logger.info("Moving view: {0}th".format(v))
             re = subprocess.run(["ImageConvert", "-in="+imageSrc, "-out=" + imageTar,"-scaleOpt","-scale="+"10"], capture_output=True, check=True)
 

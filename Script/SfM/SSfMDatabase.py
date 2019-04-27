@@ -192,6 +192,12 @@ class COLMAPDatabase(sqlite3.Connection):
             (camera_id,image_id))
         return cursor.lastrowid
 
+    def change_image_id(self, image_id,new_image_id):
+        cursor = self.execute(
+            "UPDATE images SET image_id = ? WHERE image_id = ?",
+            (new_image_id,image_id))
+        return cursor.lastrowid
+
     def add_keypoints(self, image_id, keypoints):
         assert(len(keypoints.shape) == 2)
         assert(keypoints.shape[1] in [2, 4, 6])
@@ -391,7 +397,7 @@ def Show_db(database_path):
     params = blob_to_array(params, np.float64)
     print(camera_id, model, width, height,params)
 
-    rows = db.execute("SELECT * FROM images WHERE image_id = 37")
+    rows = db.execute("SELECT * FROM images WHERE image_id = 36")
     image_id,name,camera_id,prior_qw,prior_qx,prior_qy,prior_qz,prior_tx,prior_ty,prior_tz = next(rows)
     print(image_id,name,camera_id,prior_qw,prior_qx,prior_qy,prior_qz,prior_tx,prior_ty,prior_tz)
     # Read and check keypoints.
@@ -400,8 +406,11 @@ def Show_db(database_path):
 
 def Update_camera_db(database_path):
     db = COLMAPDatabase.connect(database_path)
-    db.set_camera( 1 , 4 , 342 , 330 ,[ 2539.21 , 2541.91 , 73.707 , 235.282 , 0 , 0 , 0 , 0 ])
-    db.set_camera( 2,4,330, 306, [2539.21, 2541.91, 67.707, 232.282, 0, 0, 0, 0 ])
+    # db.set_camera( 1 , 4 ,360, 350, [4232.02, 4236.525, 13.9225, 96.068, 0, 0, 0, 0]) #oatmeal
+    db.set_camera(1, 4, 660, 440, [8464.04, 8473.05, 15.69, 189.272, 0, 0, 0, 0])  # gift1
+    db.set_camera(2,4,790, 550, [8464.04, 8473.05, 45.69, 304.272, 0, 0, 0, 0])   # gift2
+    # db.set_camera(2,4,395, 275, [4232.02, 4236.525, 45.69, 304.272, 0, 0, 0, 0])   # gift2
+    # db.set_camera( 2,4,330, 306, [2539.21, 2541.91, 67.707, 232.282, 0, 0, 0, 0 ])
     db.commit()
     db.close()
 
@@ -409,13 +418,24 @@ def Update_image_db(database_path):
     db = COLMAPDatabase.connect(database_path)
     nViewsCount = 36
     for i in range(nViewsCount):
-        db.set_image(i + 1,1)
+        db.set_image(i+1,1)
     db.set_image(37,2)
     db.commit()
     db.close()
 
+def Change_image_id(database_path):
+    db = COLMAPDatabase.connect(database_path)
+    nViewsCount = 36
+    db.change_image_id(1,38)
+    for i in range(nViewsCount):
+        db.change_image_id(i+2,i+1)
+    db.change_image_id(38,37)
+    db.commit()
+    db.close()
+
 if __name__ == "__main__":
-    database_path = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookiesMerge\SfM\SfM_FIRST_OBJECT\database.db"
+    database_path = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-giftMerge\SfMFromPrism\SfM_FIRST_OBJECT\database.db"
     Update_camera_db(database_path)
+    # Change_image_id(database_path)
     Update_image_db(database_path)
     Show_db(database_path)

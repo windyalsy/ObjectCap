@@ -40,6 +40,7 @@ if __name__ == "__main__":
     BUILD_ROOT = r"D:\v-jiazha\2-workspaces\Source\ObjectCap\x64\Release"
     TOOL_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\2-3rdTool"
     DATA_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
+    DATA_ROOT_E = r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
     TOOL_LCT_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\2-3rdTool\LCT"
     COMMON_ROOT = os.path.join(DATA_ROOT, r'RealCommon')
     CONFIG_ROOT = os.path.join(COMMON_ROOT,r"Config0301")
@@ -70,24 +71,32 @@ if __name__ == "__main__":
     colScanWidth = "1"
     colScanHeight = "23"
 
-    OBJECT_MERGE = r"RealObject-cookiesMerge"
+    # OBJECT_MERGE = r"RealObject-cookiesMerge"
+    OBJECT_MERGE = r"RealObject-oatmealMerge"
+    # OBJECT_MERGE = r"RealObject-giftMerge"
     OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object',OBJECT_MERGE)
-    OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfM1')
-    OBJECT_ROOT_MERGE_SFM_CONFIG = os.path.join(OBJECT_ROOT_MERGE, r'SfM1','SfMConfig')
+    OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfMFromPrismMultiSeq')
+    OBJECT_ROOT_MERGE_SFM_CONFIG = os.path.join(OBJECT_ROOT_MERGE_SFM,'SfMConfig')
     OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model","Final")
 
     # nCount = "2"
     # OBJECT_LIST = "RealObject-cookies,RealObject-cookies2"
     nCount = "1"
-    OBJECT_LIST = "RealObject-cookies"
+    # OBJECT_LIST = "RealObject-cookies"
+    OBJECT_LIST = "RealObject-oatmeal"
 
-    OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object',"%s")
+    # OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object',"%s")
+    OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object',"%s")
     OBJECT_ViewDir = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
     OBJECT_Model_Dir = os.path.join(OBJECT_ROOT, "Recover", "Model","FinalOpt")
+    OBJECT_CalibPrism_Dir = os.path.join(OBJECT_ROOT,"CalibPrism")
+    OBJECT_ColmapSfM_Dir = os.path.join(OBJECT_ROOT,"ColmapSfM")
 
     # Camera extrinsic, scale setting
     viewScale = "0.009"
     cameraExtrinDirectory = os.path.join(OBJECT_ROOT, "CalibPrism", "Extrinsic")
+
+    transExtrinFile = os.path.join(OBJECT_ColmapSfM_Dir,"transExtrin.txt")
 
 
     alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.obj")
@@ -97,14 +106,11 @@ if __name__ == "__main__":
     alignModelRec = os.path.join(OBJECT_Model_Dir_MERGE,"Recover.obj")
 
     # Option setting
-    CapLoadSfMCameraOpt = 1
-    CapCreateKeyPointsOpt = 1
-    CapAlignPointCloudOpt = 1
-    CapRefinePointCloudOpt = 1
-    CleanPointCloudOption = 1
-    logger.info("Start merging objects:")
-    if not os.path.exists( OBJECT_Model_Dir_MERGE):
-        os.makedirs( OBJECT_Model_Dir_MERGE)
+    CapWriteSfMCameraOpt = 1
+
+    logger.info("Start writing SfM camera extrinsics:")
+    if not os.path.exists( OBJECT_ROOT_MERGE_SFM_CONFIG):
+        os.makedirs( OBJECT_ROOT_MERGE_SFM_CONFIG)
     _environ = dict(os.environ)
     try:
         if 'PATH' in _environ:
@@ -112,11 +118,11 @@ if __name__ == "__main__":
         else:
             os.environ['PATH'] = BUILD_ROOT + ";" + TOOL_ROOT + ";" + TOOL_LCT_ROOT
 
-        if CapLoadSfMCameraOpt:
+        if CapWriteSfMCameraOpt:
             cameraExtrin = os.path.join(cameraExtrinDirectory, "view_%04d.txt")
             imageListFile = os.path.join(OBJECT_ROOT_MERGE_SFM_CONFIG, 'imagesFromOrigin.txt')
             re = subprocess.run(
-                ["CapSfMWriteCam", "-cameraExtrin=" + cameraExtrin,
+                ["CapSfMWriteCam", "-cameraExtrin=" + cameraExtrin,"-transExtrin=" + transExtrinFile,
                  "-nCount=" + nCount, "-nViews=" + nViews,"-viewScale=" + viewScale,
                  "-imageListFile=" + imageListFile,
                  "-objectListString=" + OBJECT_LIST],

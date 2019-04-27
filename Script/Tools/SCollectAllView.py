@@ -10,7 +10,7 @@ def CollectAllView(OBJECT):
 
     BUILD_ROOT = r"D:\v-jiazha\4-projects\5-LED\0-ObjectCap\x64\Release"
     DATA_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
-    # DATA_ROOT_E = r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
+    DATA_ROOT_E = r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
     TOOL_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\2-3rdTool"
     COMMON_ROOT = os.path.join(DATA_ROOT, r'RealCommon')
 
@@ -18,6 +18,7 @@ def CollectAllView(OBJECT):
 
     # OBJECT = r"RealObject-penrack"
     OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object', OBJECT)
+    OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object', OBJECT)
 
     nviews = 36
     v_size = 184
@@ -39,12 +40,13 @@ def CollectAllView(OBJECT):
         logging.info("Data prepare")
         for v in range(nviews):
             viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d" % v)
-            src = os.path.join(viewDirectory,r"Recover\NrmRefine\Experiment\Frames\nrmObj.pfm")
+
+            src = os.path.join(viewDirectory,r"Recover\NrmRefine\Iter_Merge_Clean\Iter_0000\Frames\nrmObj.pfm")
             tar = os.path.join(collectViewDir,"View_%04d_prjNrm.jpg"%v)
 
 
-            # src = os.path.join(r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookiesMerge\SfMCookie\images","image%02d.jpg"%(v+1))
-            # tar = os.path.join(collectViewDir,"View_%04d_diff.jpg"%v)
+            src = os.path.join(r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookies2Old\SfM\images2","image%02d.jpg"%(v+1))
+            tar = os.path.join(collectViewDir,"View_%04d_diff.jpg"%v)
 
             # cr2 convert to jpg
             re = subprocess.run(["magick.exe", src, tar], stdout=True, stderr=True, check=True)
@@ -55,5 +57,8 @@ def CollectAllView(OBJECT):
         os.environ.update(_environ)
 
 if __name__ == "__main__":
-    OBJECT = r"RealObject-cookies"
+    # OBJECT = r"RealObject-cookies"
+    OBJECT = r"RealObject-cookies2Old"
+    # OBJECT = r"RealObject-oatmeal2"
+    # OBJECT = r"RealObject-oatmeal"
     CollectAllView(OBJECT)

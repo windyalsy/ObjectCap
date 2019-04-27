@@ -47,8 +47,8 @@ if __name__ == "__main__":
     # OBJECT = r"RealObject-pig2"
     # OBJECT = r"RealObject-penrack3"
     # OBJECT = r"RealObject-pig2"
-    # OBJECT = r"RealObject-oatmeal"
-    OBJECT = r"RealObject-cookies"
+    OBJECT = r"RealObject-oatmeal"
+    # OBJECT = r"RealObject-cookies"
     # OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object', OBJECT)
     OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object', OBJECT)
     OBJECT_ViewDir = os.path.join(OBJECT_ROOT, "Views","View_%04d")

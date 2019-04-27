@@ -1,5 +1,4 @@
-#parallel preprocess scan data
-#automatically download image data and preprocess them
+#Align two sequences.
 
 import os
 import subprocess
@@ -12,23 +11,6 @@ import logging
 import trimesh
 from datetime import datetime
 
-def obj2ply(objFile, plyFile):
-    mesh = trimesh.load(objFile,process=None)
-    mesh.export(plyFile,"ply",encoding='ascii',vertex_normal=True)
-    # mesh = pymesh.load_mesh(objFile)
-    # pymesh.save_mesh(plyFile, mesh, ascii=True)
-    return
-
-def ply2obj(plyFile, objFile):
-    mesh = trimesh.load(plyFile,process=None,vertex_normal=True)
-    print(len(mesh.vertex_normals))
-    mesh.export(objFile)
-    return
-
-def rmBadFace(objFile,objRFile):
-    mesh = trimesh.load(objFile)
-    mesh.remove_degenerate_faces()
-    mesh.export(objRFile)
 
 def _logpath(path, names):
     print('Working in %s' % path)
@@ -73,27 +55,30 @@ if __name__ == "__main__":
 
     # OBJECT_MERGE = r"RealObject-cookiesMerge"
     OBJECT_MERGE = r"RealObject-oatmealMerge"
+    # OBJECT_MERGE = r"RealObject-giftMerge"
     OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object',OBJECT_MERGE)
-    OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfMTwoSeq')
+    OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfMFromPrismMultiSeq')
     OBJECT_ROOT_MERGE_SFM_CONFIG = os.path.join(OBJECT_ROOT_MERGE_SFM,'SfMConfig')
-    # OBJECT_ROOT_MERGE_SFM_CONFIG = os.path.join(OBJECT_ROOT_MERGE_SFM,'sparse')
     OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model","Final")
 
     # nCount = "2"
     # OBJECT_LIST = "RealObject-cookies,RealObject-cookies2"
+    nCount = "1"
+    # OBJECT_LIST = "RealObject-cookies"
+    OBJECT_LIST = "RealObject-oatmeal"
 
-    nCount = "2"
-    # OBJECTS = ["RealObject-cookies","RealObject-cookies2"]
-    OBJECTS = ["RealObject-oatmeal", "RealObject-oatmeal2"]
-    OBJECT_LIST = ','.join(OBJECTS)
-
+    # OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object',"%s")
     OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object',"%s")
     OBJECT_ViewDir = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
     OBJECT_Model_Dir = os.path.join(OBJECT_ROOT, "Recover", "Model","FinalOpt")
+    OBJECT_CalibPrism_Dir = os.path.join(OBJECT_ROOT,"CalibPrism")
+    OBJECT_ColmapSfM_Dir = os.path.join(OBJECT_ROOT,"ColmapSfM")
 
     # Camera extrinsic, scale setting
-    viewScale = "1"
-    cameraExtrinDirectory = os.path.join(OBJECT_ROOT, "ColmapSfM", "Extrinsic")
+    viewScale = "0.009"
+    cameraExtrinDirectory = os.path.join(OBJECT_ROOT, "CalibPrism", "Extrinsic")
+
+    transExtrinFile = os.path.join(OBJECT_ColmapSfM_Dir,"transExtrin.txt")
 
 
     alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.obj")
@@ -103,14 +88,11 @@ if __name__ == "__main__":
     alignModelRec = os.path.join(OBJECT_Model_Dir_MERGE,"Recover.obj")
 
     # Option setting
-    CapLoadSfMCameraOpt = 1
-    CapCreateKeyPointsOpt = 1
-    CapAlignPointCloudOpt = 1
-    CapRefinePointCloudOpt = 1
-    CleanPointCloudOption = 1
-    logger.info("Start merging objects:")
-    if not os.path.exists( OBJECT_Model_Dir_MERGE):
-        os.makedirs( OBJECT_Model_Dir_MERGE)
+    CapWriteSfMCameraOpt = 1
+
+    logger.info("Start writing SfM camera extrinsics:")
+    if not os.path.exists( OBJECT_ROOT_MERGE_SFM_CONFIG):
+        os.makedirs( OBJECT_ROOT_MERGE_SFM_CONFIG)
     _environ = dict(os.environ)
     try:
         if 'PATH' in _environ:
@@ -118,12 +100,12 @@ if __name__ == "__main__":
         else:
             os.environ['PATH'] = BUILD_ROOT + ";" + TOOL_ROOT + ";" + TOOL_LCT_ROOT
 
-        if CapLoadSfMCameraOpt:
+        if CapWriteSfMCameraOpt:
             cameraExtrin = os.path.join(cameraExtrinDirectory, "view_%04d.txt")
-            imageListFile = os.path.join(OBJECT_ROOT_MERGE_SFM_CONFIG, 'images.txt')
+            imageListFile = os.path.join(OBJECT_ROOT_MERGE_SFM_CONFIG, 'imagesFromOrigin.txt')
             re = subprocess.run(
-                ["CapSfMParseCam", "-cameraExtrin=" + cameraExtrin,
-                 "-nCount=" + nCount, "-nViews=" + nViews,
+                ["CapSfMWriteCam", "-cameraExtrin=" + cameraExtrin,"-transExtrin=" + transExtrinFile,
+                 "-nCount=" + nCount, "-nViews=" + nViews,"-viewScale=" + viewScale,
                  "-imageListFile=" + imageListFile,
                  "-objectListString=" + OBJECT_LIST],
                 stdout=True, stderr=True, check=True)

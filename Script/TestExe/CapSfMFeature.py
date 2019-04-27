@@ -45,13 +45,12 @@ if __name__ == "__main__":
     CONFIG_ROOT = os.path.join(COMMON_ROOT,r"Config0301")
 
     # OBJECT = r"RealObject-pig2"
-    # OBJECT = r"RealObject-penrack3"
+    OBJECT = r"RealObject-penrack3"
     # OBJECT = r"RealObject-pig2"
     # OBJECT = r"RealObject-oatmeal"
-    # OBJECT = r"RealObject-oatmeal2"
     # OBJECT = r"RealObject-cookies2"
-    OBJECT = r"RealObject-cookies"
-    OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object', OBJECT)
+    # OBJECT = r"RealObject-cookies"
+    OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object', OBJECT)
     OBJECT_ViewDir = os.path.join(OBJECT_ROOT, "Views","View_%04d")
     OBJECT_CalibPrismDir = os.path.join(OBJECT_ROOT, "CalibPrism")
     OBJECT_ColmapSfMDir = os.path.join(OBJECT_ROOT, "ColmapSfM")
@@ -113,19 +112,18 @@ if __name__ == "__main__":
         nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
         nrmRefineIterFinalDir = os.path.join(nrmRefineDirectory, "Iter", "Iter_final")
         refineNrmR = os.path.join(nrmRefineIterFinalDir, "nrmR.pfm")
+        diffWeight = os.path.join(nrmRefineIterFinalDir, "Base_diffuse", "weight.pfm")
+        viewFeatImgFile = os.path.join(nrmRefineIterFinalDir, "combineFeat.pfm")
 
         cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt")
         nrmRefRecDir = os.path.join(nrmRefineDirectory, nrmRefRecDirName)
 
-
         re = subprocess.run(
-            ["CapNrmRecIntoObj","-cameraConfig=" + cameraConfig, "-cameraExtrin=" + cameraExtrinsic,
+            ["CapSfMFeature",
              "-viewNrmImgFile=" + refineNrmR,
-             "-viewFramesDirectory=" + nrmRefRecDir ,
-            "-viewScale=" + viewScale,"-nViews="+nViews],
+             "-viewRGBImgFile=" + diffWeight ,
+            "-viewFeatImgFile=" + viewFeatImgFile,"-nViews="+nViews],
             stdout=True, stderr=True, check=True)
-
-
     finally:
         os.environ.clear()
         os.environ.update(_environ)

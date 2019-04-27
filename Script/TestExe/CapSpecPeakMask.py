@@ -40,15 +40,18 @@ if __name__ == "__main__":
     BUILD_ROOT = r"D:\v-jiazha\2-workspaces\Source\ObjectCap\x64\Release"
     TOOL_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\2-3rdTool"
     DATA_ROOT = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
+    DATA_ROOT_E = r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS"
     COMMON_ROOT = os.path.join(DATA_ROOT, r'RealCommon')
     CONFIG_ROOT = os.path.join(COMMON_ROOT,r"Config0301")
 
     # OBJECT = r"RealObject-pig2"
     # OBJECT = r"RealObject-penrack3"
     # OBJECT = r"RealObject-pig2"
-    OBJECT = r"RealObject-oatmeal"
+    # OBJECT = r"RealObject-oatmeal"
+    OBJECT = r"RealObject-oatmeal2"
+    # OBJECT = r"RealObject-gift1"
     # OBJECT = r"RealObject-cookies"
-    OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object', OBJECT)
+    OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object', OBJECT)
     OBJECT_ViewDir = os.path.join(OBJECT_ROOT, "Views","View_%04d")
     OBJECT_CalibPrismDir = os.path.join(OBJECT_ROOT, "CalibPrism")
 
@@ -75,6 +78,7 @@ if __name__ == "__main__":
     genericStart = "0.01"
     genericEnd = "0.60"
     genericRoughnesses = "0.01,0.02,0.04,0.07,0.09,0.11,0.13,0.16,0.20,0.25,0.40"
+    # genericRoughnesses = "0.01,0.02,0.04,0.07,0.09,0.11,0.13,0.16,0.20,0.25"
     # genericRoughnesses = "0.01,0.02,0.03,0.05,0.07,0.09,0.11,0.13,0.16,0.20,0.25"
 
     # Downsampled lights

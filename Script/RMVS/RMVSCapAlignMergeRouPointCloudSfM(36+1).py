@@ -72,17 +72,20 @@ if __name__ == "__main__":
     colScanHeight = "23"
 
     # OBJECT_MERGE = r"RealObject-cookiesMerge"
-    OBJECT_MERGE = r"RealObject-oatmealMerge"
+    # OBJECT_MERGE = r"RealObject-oatmealMerge"
+    OBJECT_MERGE = r"RealObject-giftMerge"
     OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object',OBJECT_MERGE)
     OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model","FinalSfM")
 
-    OBJECT1 = r"RealObject-oatmeal"
+    # OBJECT1 = r"RealObject-oatmeal"
+    OBJECT1 = r"RealObject-gift1"
     OBJECT_ROOT1 = os.path.join(DATA_ROOT_E, r'Object',OBJECT1)
     OBJECT_ViewDir1 = os.path.join(OBJECT_ROOT1, "Views", "View_%04d")
     OBJECT_Model_Dir1 = os.path.join(OBJECT_ROOT1, "Recover", "Model","FinalOpt")
 
-    OBJECT2 = r"RealObject-oatmeal2"
-    OBJECT_ROOT2 = os.path.join(DATA_ROOT_E, r'Object',OBJECT2)
+    # OBJECT2 = r"RealObject-oatmeal2"
+    OBJECT2 = r"RealObject-gift2"
+    OBJECT_ROOT2 = os.path.join(DATA_ROOT, r'Object',OBJECT2)
     OBJECT_ViewDir2 = os.path.join(OBJECT_ROOT2, "Views", "View_%04d")
     OBJECT_Model_Dir2 = os.path.join(OBJECT_ROOT2, "Recover", "Model","FinalOpt")
 
@@ -91,12 +94,12 @@ if __name__ == "__main__":
     cameraConfig2 = os.path.join(CONFIG_ROOT, "Setup" + OBJECT2, "cameraConfig.txt")
 
     # Camera extrinsic, scale setting
-    # viewScale = "0.009"
-    viewScale = "1"
-    cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "ColmapSfM", "Extrinsic")
-    cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "ColmapSfM", "Extrinsic")
-    # cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "CalibPrism", "Extrinsic")
-    # cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "CalibPrism", "Extrinsic")
+    viewScale = "0.009"
+    # viewScale = "1"
+    # cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "ColmapSfM", "Extrinsic")
+    # cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "ColmapSfM", "Extrinsic")
+    cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "CalibPrism", "Extrinsic")
+    cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "CalibPrism", "Extrinsic")
 
     # keyPointsUVFile1 = os.path.join(OBJECT_Model_Dir_MERGE,"keyPointsUV1.txt")
     # keyPointsUVFile2 = os.path.join(OBJECT_Model_Dir_MERGE,"keyPointsUV2.txt")
@@ -106,30 +109,37 @@ if __name__ == "__main__":
     keyPointsPosFile2 = os.path.join(OBJECT_Model_Dir_MERGE,"keyPointsPos2.txt")
 
     # tranform second point cloud into the first one
-    # transExtrinFile = os.path.join(OBJECT_Model_Dir_MERGE,"transExtrin.txt")
-    transExtrinFile = os.path.join(OBJECT_Model_Dir_MERGE,"transExtrinIdentity.txt")
+    transExtrinFile = os.path.join(OBJECT_Model_Dir_MERGE,"transExtrin.txt")
+    # transExtrinFile = os.path.join(OBJECT_Model_Dir_MERGE,"transExtrinIdentity.txt")
     # refine normal MVS setting
-    nrmRefRecDirName1 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=1_dptWeight=1_fDistTH=0.5_nDptIters=1"
-    nrmRefRecDirName2 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=10_dptWeight=10_fDistTH=1_nDptIters=1"
+    nrmRefRecDirName1 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=10_dptWeight=10_fDistTH=1_nDptIters=2"
+    nrmRefRecDirName2 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=10_dptWeight=10_fDistTH=1_nDptIters=2"
 
-    # src1Model = os.path.join(OBJECT_ROOT1,"Recover/Model/NrmRefine",nrmRefRecDirName1,"Comb_refine_.obj")
-    # src2Model = os.path.join(OBJECT_ROOT2,"Recover/Model/NrmRefine",nrmRefRecDirName2,"Comb_refine_.obj")
+    src1Model = os.path.join(OBJECT_ROOT1,"Recover/Model/NrmRefine",nrmRefRecDirName1,"Comb_refine_.obj")
+    src2Model = os.path.join(OBJECT_ROOT2,"Recover/Model/NrmRefine",nrmRefRecDirName2,"Comb_refine_.obj")
     # src1Model = os.path.join(OBJECT_Model_Dir1,"RecoverUpdate.obj")
     # src2Model = os.path.join(OBJECT_Model_Dir2,"RecoverUpdate.obj")
 
-    alignColmapModel = os.path.join(OBJECT_Model_Dir_MERGE,"fused.obj")
-    # alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.obj")
-    alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"fusedFlip.obj")
-    # alignModelPly = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.ply")
-    alignModelPly = os.path.join(OBJECT_Model_Dir_MERGE,"fusedFlip.ply")
+    # alignColmapModel = os.path.join(OBJECT_Model_Dir_MERGE,"fused.obj")
+    alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.obj")
+    # alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"fusedFlip.obj")
+    alignModelPly = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.ply")
+    # alignModelPly = os.path.join(OBJECT_Model_Dir_MERGE,"fusedFlip.ply")
     alignModelPoi = os.path.join(OBJECT_Model_Dir_MERGE,"Align_Poi.ply")
     alignModelTrim = os.path.join(OBJECT_Model_Dir_MERGE,"Align_Trim.ply")
     alignModelRec = os.path.join(OBJECT_Model_Dir_MERGE,"Recover_clean.obj")
     meshFinalDirObj = os.path.join(OBJECT_Model_Dir_MERGE,"RecoverFinal_clean.obj")
 
+    # Colmap Setting
+    OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfMFromPrism')
+    OBJECT_COLMAP_ROOT = os.path.join(OBJECT_ROOT_MERGE_SFM, "SfM_FIRST_OBJECT")
+    colmap_sparse_model_dir = os.path.join(OBJECT_COLMAP_ROOT, "sparse", "model")
+    colmap_sparse_modelUpt_dir = os.path.join(OBJECT_COLMAP_ROOT, "sparse", "modelUpt", "vocab-tree.bin")
+    imageListFile = os.path.join(colmap_sparse_modelUpt_dir, 'images.txt')
+
     # Option setting
-    CapAlignPointCloudOpt = 1
-    CleanPointCloudOption = 0
+    CapAlignPointCloudOpt = 0
+    CleanPointCloudOption = 1
     logger.info("Start merging objects:")
     if not os.path.exists( OBJECT_Model_Dir_MERGE):
         os.makedirs( OBJECT_Model_Dir_MERGE)
@@ -145,26 +155,29 @@ if __name__ == "__main__":
             cameraExtrinsic1 = os.path.join(cameraExtrinDirectory1, "view_%04d.txt")
             cameraExtrinsic2 = os.path.join(cameraExtrinDirectory2, "view_%04d.txt")
 
-            # re = subprocess.run(
-            #     ["CapTwoSeqTrans", "-src1ModelFile=" + src1Model, "-src2ModelFile=" + src2Model,
-            #      "-tarModelFile=" + alignModel,
-            #      "-cameraExtrin1=" + cameraExtrinsic1,
-            #      "-cameraExtrin2=" + cameraExtrinsic2,
-            #      "-transExtrin=" + transExtrinFile,
-            #      "-viewScale=" + viewScale, "-flipZ", "-nViews=" + nViews],
-            #     stdout=True, stderr=True, check=True)
-            #
-            # from ColMap: model need to be flipped
+            selectCameraExtrinsic1 = cameraExtrinsic1 % 23
+            selectCameraExtrinsic2 = cameraExtrinsic2 % 8
             re = subprocess.run(
-                ["ModelConvert.exe", "-srcModelFile=" + alignColmapModel, "-tarModelFile=" + alignModel, "-flipZ", "-flipY"],
+                ["CapTwoSeqTrans", "-src1ModelFile=" + src1Model, "-src2ModelFile=" + src2Model,
+                 "-tarModelFile=" + alignModel,
+                 "-cameraExtrin1=" + selectCameraExtrinsic1,
+                 "-cameraExtrin2=" + selectCameraExtrinsic2,
+                 "-transExtrin=" + transExtrinFile,
+                 "-imageListFile=" + imageListFile,
+                 "-viewScale=" + viewScale, "-flipZ", "-nViews=" + nViews],
                 stdout=True, stderr=True, check=True)
+
+            # # from ColMap: model need to be flipped
+            # re = subprocess.run(
+            #     ["ModelConvert.exe", "-srcModelFile=" + alignColmapModel, "-tarModelFile=" + alignModel, "-flipZ", "-flipY"],
+            #     stdout=True, stderr=True, check=True)
             obj2ply(alignModel, alignModelPly)
             logger.info("PoissonRecon: ")
             re = subprocess.run(
                 ["PoissonRecon.exe", "--in", alignModelPly, "--out", alignModelPoi, "--normals", "--pointWeight",
                  "0",
                  "--depth",
-                 "10", "--density", "--threads","2"], stdout=True, stderr=True,
+                 "10", "--density", "--threads","16"], stdout=True, stderr=True,
                 check=True)
             # trim combined mesh
             re = subprocess.run(
@@ -294,7 +307,7 @@ if __name__ == "__main__":
                     ["PoissonRecon.exe", "--in", modelInP, "--out", modelOutP, "--normals",
                      "--pointWeight", "0",
                      "--depth",
-                     "10", "--density", "--threads", "2", "--samplesPerNode", "5"], stdout=True,
+                     "10", "--density", "--threads", "16", "--samplesPerNode", "5"], stdout=True,
                     stderr=True, check=True)
                 # trim combined mesh
                 modelInT = modelOutP

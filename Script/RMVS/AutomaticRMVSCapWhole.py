@@ -47,11 +47,11 @@ if __name__ == "__main__":
     CONFIG_ROOT = os.path.join(COMMON_ROOT,r"Config0301")
 
     # OBJECT = r"RealObject-pig2"
-    # OBJECT = r"RealObject-penrack3"
+    OBJECT = r"RealObject-penrack3"
     # OBJECT = r"RealObject-pig2"
     # OBJECT = r"RealObject-oatmeal"
     # OBJECT = r"RealObject-oatmeal2"
-    OBJECT = r"RealObject-cookies"
+    # OBJECT = r"RealObject-cookies"
     # OBJECT = r"RealObject-cookies2"
     # OBJECT = r"RealObject-gift1"
     # OBJECT = r"RealObject-gift2"
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     u_size = 224
     nTotal = 409
     sleepTime = 60
-    miniutesAgo = 60 * (15 + 24*8)
+    miniutesAgo = 60 * (15 + 24*10)
     timerBarrier = (time.time() - 60 * miniutesAgo) #if file is created after timeBarrier, it's new
 
     # Setup setting: camera, panel pose
@@ -114,6 +114,13 @@ if __name__ == "__main__":
     colScanWidth = "1"
     colScanHeight = "23"
 
+    # Importance sampling:
+    numUniform = "10"
+    numImportance = "10"
+
+    # Record iteration option
+    recordIterOption = "0"
+
     # Camera extrinsic, scale setting
     viewScale = "0.009"
     cameraExtrinDirectory = os.path.join(OBJECT_ROOT, "CalibPrism", "Extrinsic")
@@ -121,6 +128,7 @@ if __name__ == "__main__":
     # nrmRefine Model : recoverDirName
     # nrmRefRecDirName = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=1_dptWeight=1_fDistTH=0.5_nDptIters=1"
     nrmRefRecDirName = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=1_dptWeight=1_fDistTH=0.1_nDptIters=1"
+    # nrmRefRecDirName = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=10_dptWeight=10_fDistTH=1_nDptIters=2"
 
     # Option setting
     DownloadViewsOption = 0
@@ -128,7 +136,7 @@ if __name__ == "__main__":
     FirstCapNrmOption = 0
     FirstMVSOption = 0
     SecondRefineNrmOption = 0
-    SecondMVSOption = 1
+    SecondMVSOption = 0
     FinalMeshOpt = 1
 
     logger.info("Start dealing object: {0}".format(OBJECT))
@@ -245,21 +253,44 @@ if __name__ == "__main__":
 
                 if CapRefineNrBasesDiffOption:
                     logger.info("CapRefineNrBases diffuse view: {0}th".format(v))
+                    # re = subprocess.run(
+                    #     ["CapRefineNrBases", "-cameraConfig=" + cameraConfig, "-panelConfig=" + panelConfig,
+                    #      "-specRouWeightFile=" + refineNrmRouWeight, "-diffWeightFile=" + refineNrmDiffWeight,
+                    #      "-inputFramesRow=" + inputFramesRow, "-inputFramesCol=" + inputFramesCol,
+                    #      "-iterDirectory=" + iterRecordDirectory,
+                    #      "-nrmFile=" + nrmFindInTableFile, "-maskFile=" + maskFile,
+                    #      "-nrmRFile=" + refineNrmR, "-errRFile=" + refineErrR,
+                    #      "-generics=" + generics, "-genericStart=" + genericStart, "-genericEnd=" + genericEnd,
+                    #      "-genericRoughnesses=" + genericRoughnesses,
+                    #      "-threshold=" + threshold, "-rowScanWidth=" + rowScanWidth, "-rowScanHeight=" + rowScanHeight,
+                    #      "-colScanWidth=" + colScanWidth, "-colScanHeight=" + colScanHeight,
+                    #      "-thetaStep=" + thetaStep, "-phiSize=" + phiSize, "-nIter=" + nIter, "-thetaSize=" + thetaSize,
+                    #      "-positionStr=" + positionStr, "-nonLocal",
+                    #      "-recordIter"],
+                    #     stdout=True, stderr=True, check=True)
+
                     re = subprocess.run(
-                        ["CapRefineNrBases", "-cameraConfig=" + cameraConfig, "-panelConfig=" + panelConfig,
-                         "-specRouWeightFile=" + refineNrmRouWeight, "-diffWeightFile=" + refineNrmDiffWeight,
+                        ["CapRefineNrBasesSampling", "-cameraConfig=" + cameraConfig, "-panelConfig=" + panelConfig,
+                         "-specRouWeightFile=" + refineNrmRouWeight,
+                         "-diffWeightFile=" + refineNrmDiffWeight,
                          "-inputFramesRow=" + inputFramesRow, "-inputFramesCol=" + inputFramesCol,
                          "-iterDirectory=" + iterRecordDirectory,
+                         "-iterFinalDirectory=" + iterFinalDirectory,
                          "-nrmFile=" + nrmFindInTableFile, "-maskFile=" + maskFile,
                          "-nrmRFile=" + refineNrmR, "-errRFile=" + refineErrR,
-                         "-generics=" + generics, "-genericStart=" + genericStart, "-genericEnd=" + genericEnd,
+                         "-generics=" + generics, "-genericStart=" + genericStart,
+                         "-genericEnd=" + genericEnd,
                          "-genericRoughnesses=" + genericRoughnesses,
-                         "-threshold=" + threshold, "-rowScanWidth=" + rowScanWidth, "-rowScanHeight=" + rowScanHeight,
+                         "-threshold=" + threshold, "-rowScanWidth=" + rowScanWidth,
+                         "-rowScanHeight=" + rowScanHeight,
                          "-colScanWidth=" + colScanWidth, "-colScanHeight=" + colScanHeight,
-                         "-thetaStep=" + thetaStep, "-phiSize=" + phiSize, "-nIter=" + nIter, "-thetaSize=" + thetaSize,
-                         "-positionStr=" + positionStr, "-nonLocal",
-                         "-recordIter"],
+                         "-thetaStep=" + thetaStep, "-phiSize=" + phiSize, "-nIter=" + nIter,
+                         "-thetaSize=" + thetaSize,
+                         "-numUniform=" + numUniform, "-numImportance=" + numImportance,
+                         "-recordIter="+recordIterOption, "-positionStr=" + positionStr, "-nonLocal"],
                         stdout=True, stderr=True, check=True)
+
+
 
                 BALL_TYPE = "Mirror"
                 recoverDirectory = os.path.join(viewDirectory, "Recover", BALL_TYPE)
@@ -303,20 +334,41 @@ if __name__ == "__main__":
                 if CapRefineNrBasesSpecOption:
                     # CapRefineNrBases using specular normal table initialization
                     logger.info("CapRefineNrBases specular view: {0}th".format(v))
+                    # re = subprocess.run(
+                    #     ["CapRefineNrBases", "-cameraConfig=" + cameraConfig, "-panelConfig=" + panelConfig,
+                    #      "-specRouWeightFile=" + refineNrmRouWeight, "-diffWeightFile=" + refineNrmDiffWeight,
+                    #      "-inputFramesRow=" + inputFramesRow, "-inputFramesCol=" + inputFramesCol,
+                    #      "-iterDirectory=" + iterRecordDirectory,
+                    #      "-nrmFile=" + nrmFindInTableFile, "-maskFile=" + maskFile,
+                    #      "-nrmRFile=" + refineNrmR, "-errRFile=" + refineErrR,
+                    #      "-generics=" + generics, "-genericStart=" + genericStart, "-genericEnd=" + genericEnd,
+                    #      "-genericRoughnesses=" + genericRoughnesses,
+                    #      "-threshold=" + threshold, "-rowScanWidth=" + rowScanWidth, "-rowScanHeight=" + rowScanHeight,
+                    #      "-colScanWidth=" + colScanWidth, "-colScanHeight=" + colScanHeight,
+                    #      "-thetaStep=" + thetaStep, "-phiSize=" + phiSize, "-nIter=" + nIter, "-thetaSize=" + thetaSize,
+                    #      "-positionStr=" + positionStr, "-nonLocal",
+                    #      "--recordIter"],
+                    #     stdout=True, stderr=True, check=True)
+
                     re = subprocess.run(
-                        ["CapRefineNrBases", "-cameraConfig=" + cameraConfig, "-panelConfig=" + panelConfig,
-                         "-specRouWeightFile=" + refineNrmRouWeight, "-diffWeightFile=" + refineNrmDiffWeight,
+                        ["CapRefineNrBasesSampling", "-cameraConfig=" + cameraConfig, "-panelConfig=" + panelConfig,
+                         "-specRouWeightFile=" + refineNrmRouWeight,
+                         "-diffWeightFile=" + refineNrmDiffWeight,
                          "-inputFramesRow=" + inputFramesRow, "-inputFramesCol=" + inputFramesCol,
                          "-iterDirectory=" + iterRecordDirectory,
+                         "-iterFinalDirectory=" + iterFinalDirectory,
                          "-nrmFile=" + nrmFindInTableFile, "-maskFile=" + maskFile,
                          "-nrmRFile=" + refineNrmR, "-errRFile=" + refineErrR,
-                         "-generics=" + generics, "-genericStart=" + genericStart, "-genericEnd=" + genericEnd,
+                         "-generics=" + generics, "-genericStart=" + genericStart,
+                         "-genericEnd=" + genericEnd,
                          "-genericRoughnesses=" + genericRoughnesses,
-                         "-threshold=" + threshold, "-rowScanWidth=" + rowScanWidth, "-rowScanHeight=" + rowScanHeight,
+                         "-threshold=" + threshold, "-rowScanWidth=" + rowScanWidth,
+                         "-rowScanHeight=" + rowScanHeight,
                          "-colScanWidth=" + colScanWidth, "-colScanHeight=" + colScanHeight,
-                         "-thetaStep=" + thetaStep, "-phiSize=" + phiSize, "-nIter=" + nIter, "-thetaSize=" + thetaSize,
-                         "-positionStr=" + positionStr, "-nonLocal",
-                         "--recordIter"],
+                         "-thetaStep=" + thetaStep, "-phiSize=" + phiSize, "-nIter=" + nIter,
+                         "-thetaSize=" + thetaSize,
+                         "-numUniform=" + numUniform, "-numImportance=" + numImportance,
+                         "--recordIter", "-positionStr=" + positionStr, "-nonLocal"],
                         stdout=True, stderr=True, check=True)
 
                 specIterFinal = os.path.join(viewDirectory, "Recover/Mirror/Iter/Iter_final")
@@ -413,19 +465,19 @@ if __name__ == "__main__":
             modelName = "re_" + OBJECT
             recoverDirName = "re_Th_"
 
-            rgbWeight = "0.1"
-            nrmWeight = "1"
-            dptWeight = "1"
+            rgbWeight = "1"
+            nrmWeight = "10"
+            dptWeight = "10"
             minDepth = "1.1"
             maxDepth = "1.3"
-            nNeighbors = "4"
-            nSteps = "1001"
-            nRefineIters = "3"
-            nRefineSteps = "9"
-            nDptIters = "1"
-            nFirstKNeighborsForCost = "2"
+            nNeighbors = "6"
+            nSteps = "200"
+            nRefineIters = "1"
+            nRefineSteps = "10"
+            nDptIters = "2"
+            nFirstKNeighborsForCost = "3"
 
-            fDistTH = "0.5"
+            fDistTH = "1"
             nMetricLabel = "1"
 
             recoverDirName = recoverDirName + "rgbWeight=" + rgbWeight + "_nrmWeight=" + nrmWeight + "_dptWeight=" \
@@ -735,8 +787,29 @@ if __name__ == "__main__":
                 refineNrmDiffWeight = os.path.join(nrmRefineIterFinalDir, r"Base_diffuse/weight.pfm")
                 if CapRefineNrBasesOption:
                     logger.info("CapRefineNrBases view: {0}th".format(v))
+                    # re = subprocess.run(
+                    #     ["CapRefineNrBases", "-cameraConfig=" + cameraConfig, "-panelConfig=" + panelConfig,
+                    #      "-specRouWeightFile=" + refineNrmRouWeight,
+                    #      "-diffWeightFile=" + refineNrmDiffWeight,
+                    #      "-inputFramesRow=" + inputFramesRow, "-inputFramesCol=" + inputFramesCol,
+                    #      "-iterDirectory=" + nrmRefineItersDirectory,
+                    #      "-iterFinalDirectory=" + nrmRefineIterFinalDir,
+                    #      "-nrmFile=" + combNrm, "-posFile=" + recPosDil, "-maskFile=" + viewMaskDilImgFile,
+                    #      "-nrmRFile=" + refineNrmR, "-errRFile=" + refineErrR, "-nrmDFile=" + refineNrmD,
+                    #      "-nrmSFile=" + refineNrmS, "-nrmDMskFile=" + refineNrmDMsk,
+                    #      "-generics=" + generics, "-genericStart=" + genericStart,
+                    #      "-genericEnd=" + genericEnd,
+                    #      "-genericRoughnesses=" + genericRoughnesses,
+                    #      "-threshold=" + threshold, "-rowScanWidth=" + rowScanWidth,
+                    #      "-rowScanHeight=" + rowScanHeight,
+                    #      "-colScanWidth=" + colScanWidth, "-colScanHeight=" + colScanHeight,
+                    #      "-thetaStep=" + thetaStep, "-phiSize=" + phiSize, "-nIter=" + nIter,
+                    #      "-thetaSize=" + thetaSize,
+                    #      "--recordIter"],
+                    #     stdout=True, stderr=True, check=True)
+
                     re = subprocess.run(
-                        ["CapRefineNrBases", "-cameraConfig=" + cameraConfig, "-panelConfig=" + panelConfig,
+                        ["CapRefineNrBasesSampling", "-cameraConfig=" + cameraConfig, "-panelConfig=" + panelConfig,
                          "-specRouWeightFile=" + refineNrmRouWeight,
                          "-diffWeightFile=" + refineNrmDiffWeight,
                          "-inputFramesRow=" + inputFramesRow, "-inputFramesCol=" + inputFramesCol,
@@ -753,7 +826,8 @@ if __name__ == "__main__":
                          "-colScanWidth=" + colScanWidth, "-colScanHeight=" + colScanHeight,
                          "-thetaStep=" + thetaStep, "-phiSize=" + phiSize, "-nIter=" + nIter,
                          "-thetaSize=" + thetaSize,
-                         "--recordIter"],
+                         "-numUniform=" + numUniform, "-numImportance=" + numImportance,
+                         "-recordIter=" + recordIterOption],
                         stdout=True, stderr=True, check=True)
 
                 refineInputFramesCol = os.path.join(nrmRefineFramesDirectory, r"result_c%04d.pfm")
@@ -858,8 +932,8 @@ if __name__ == "__main__":
             nFirstKNeighborsForCost = "3"
             fDistTH = "1"
             nMetricLabel = "1"
-            checkW = "174"
-            checkH = "18"
+            checkW = "109"
+            checkH = "48"
 
             # modelName = modelName + "rgbWeight="+rgbWeight+"_nrmWeight="+nrmWeight+"_dptWeight="\
             #                  +dptWeight+"_fDistTH="+fDistTH + "_nDptIters="+nDptIters
@@ -899,7 +973,7 @@ if __name__ == "__main__":
                      "-minDepth=" + minDepth, "-maxDepth=" + maxDepth, "-nNeighbors=" + nNeighbors,
                      "-nSteps=" + nSteps, "-nRefineIters=" + nRefineIters, "-nRefineSteps=" + nRefineSteps,
                      "-nFirstKNeighborsForCost=" + nFirstKNeighborsForCost, "-nViews=" + nViews,
-                     "-checkW=" + checkW, "-checkH=" + checkH, "-checkOption",
+                     "-checkW=" + checkW, "-checkH=" + checkH, "--checkOption",
                      "-bDistTHLabel",
                      "-fDistTH=" + fDistTH, "-nMetricLabel=" + nMetricLabel, "-flipZ", "-GPUOption",
                      "-viewScale=" + viewScale, "-realOption"], stdout=True, stderr=True, check=True)
@@ -994,7 +1068,7 @@ if __name__ == "__main__":
                 re = subprocess.run(
                     ["PoissonRecon.exe", "--in", meshComF, "--out", meshComReconF, "--normals", "--pointWeight", "0",
                      "--depth",
-                     "10", "--density", "--threads", "2","--samplesPerNode", "15"], stdout=True, stderr=True, check=True)
+                     "9", "--density", "--threads", "2","--samplesPerNode", "15"], stdout=True, stderr=True, check=True)
                 # trim combined mesh
                 re = subprocess.run(
                     ["SurfaceTrimmer.exe", "--in", meshComReconF, "--out", meshComReconTrimF, "--trim", "6"],
@@ -1071,14 +1145,14 @@ if __name__ == "__main__":
                         ["PoissonRecon.exe", "--in", modelInP, "--out", modelOutP, "--normals",
                          "--pointWeight","0",
                          "--depth",
-                         "10", "--density", "--threads", "2", "--samplesPerNode", "5"], stdout=True,
+                         "8", "--density", "--threads", "2", "--samplesPerNode", "1"], stdout=True,
                         stderr=True, check=True)
                     # trim combined mesh
                     modelInT = modelOutP
                     modelOutT = trimModel % iter
                     re = subprocess.run(
                         ["SurfaceTrimmer.exe", "--in", modelInT, "--out", modelOutT, "--trim",
-                         "4"],
+                         "6"],
                         stdout=True, stderr=True, check=True)
                     ply2obj(modelOutT, recModel % iter)
 
@@ -1099,7 +1173,7 @@ if __name__ == "__main__":
         FitRouOption = 1
         texWidth="1024"
         texHeight="1024"
-        edgeLength = "0.0005"
+        edgeLength = "0.0003"
         meshOpt_nIter = 2
 
         # MODEL_ROOT = os.path.join(OBJECT_ROOT, r"Recover\Model")
@@ -1164,7 +1238,7 @@ if __name__ == "__main__":
                         logger.info("UVAtlas ")
                         # UVAtlas parameterization
                         re = subprocess.run(
-                            ["UVAtlas", "-iv","TEXCOORD","-w",texWidth,"-h",texHeight,"-y", "-o", reModelUV, reModelR],
+                            ["UVAtlas", "-na","-iv","TEXCOORD","-w",texWidth,"-h",texHeight,"-y", "-o", reModelUV, reModelR],
                             stdout=True, stderr=True, check=True)
 
                         logger.info("Project recovered model into each view:")
@@ -1363,10 +1437,11 @@ if __name__ == "__main__":
                     viewDistImgFile = os.path.join(viewRecNrmDir, "distR.pfm")
                     viewNrmImgFile = os.path.join(viewRecNrmDir, "nrmObj.pfm")
                     # viewMaskImgFile = os.path.join(nrmRefineFramesDirectory, "mask.pfm")
-                    viewMaskImgFile = os.path.join(viewRecNrmDir, "maskR.pfm")
                     viewTexCoordImgFile = os.path.join(nrmRefineFramesDirectory, "tex.pfm")
                     viewGeoNrmImgFile = os.path.join(nrmRefineFramesDirectory, "nrmObj.pfm")
+                    viewMaskImgFile = os.path.join(viewRecNrmDir, "maskR.pfm")
                     # viewMaskImgFile = os.path.join(nrmRefineIterFinalDir, "specNicePeakMask.pfm")
+                    # viewMaskImgFile = os.path.join(nrmRefineIterFinalDir, "nicePeakMask.pfm")
 
                     refineNrmRouWeight = os.path.join(nrmRefineIterFinalDir, r"Base_r_%.5f/weight.pfm")
                     refineNrmDiffWeight = os.path.join(nrmRefineIterFinalDir, r"Base_diffuse/weight.pfm")
@@ -1404,35 +1479,17 @@ if __name__ == "__main__":
                          "-viewScale=" + viewScale
                          ], stdout=True, stderr=True, check=True)
 
+                    re = subprocess.run(
+                        ["ImgDilator", "-in=" + texNrmImgFile, "-out=" + texNrmImgFile, "-n=" + "2"], stdout=True,
+                        stderr=True,
+                        check=True)
+
                     logger.info("Update normal")
                     re = subprocess.run(
                         ["CapUpdateNrm",
                          "-texNrmImgFile=" + texNrmImgFile,
                          "-srcModelFile=" + reModelUV, "-tarModelFile=" + reModelUpt, "-flipZ","--merge"
                          ], stdout=True, stderr=True, check=True)
-
-                    # logger.info("Change obj into ply")
-                    # # mesh.export(plyFile, "ply", encoding='ascii', vertex_normal=True)
-                    # obj2ply(reModelUpt, reModelUptPly)
-                    #
-                    # re = subprocess.run(
-                    #     ["mesh_opt", reModelUptPly, "norm:"+ reModelFinal], stdout=True, stderr=True, check=True)
-                    # ply2obj(reModelFinal,reModelFinalObj)
-
-                    # re = subprocess.run(
-                    #     ["CapNrmCombine",
-                    #      "-viewNrmImgFile=" + viewNrmImgFile, "-viewDistImgFile=" + viewDistImgFile,
-                    #      "-viewTexCoordImgFile=" + viewTexCoordImgFile,
-                    #      "-viewDiffWeightFile=" + refineNrmDiffWeight, "-viewSpecRouWeightFile=" + refineNrmRouWeight,
-                    #      "-genericRoughnesses=" + genericRoughnesses,
-                    #      "-texNrmImgFile=" + texNrmImgFile,
-                    #      "-texDiffImgFile=" + texDiffImgFile,
-                    #      "-texSpecRouImgFile=" + texSpecRouImgFile,
-                    #      "-viewMaskImgFile=" + viewMaskImgFile, "-nViews=" + nViews, "-width=" + texWidth,
-                    #      "-height=" + texHeight,
-                    #      "-srcModelFile=" + reModelUV, "-tarModelFile=" + reModelUpt, "-flipZ", "-solveRou",
-                    #      "-texSpecFitImgFile=" + texSpecFitImgFile, "-texRouFitImgFile=" + texRouFitImgFile
-                    #      ], stdout=True, stderr=True, check=True)
 
                     re = subprocess.run(
                         ["CapBRDFCombine",
@@ -1468,7 +1525,7 @@ if __name__ == "__main__":
                     if CapDilateTextureOption:
                         # dilate texture
                         inputDir= os.path.dirname(reModelFinalObjFlip)
-                        nDil = "2"
+                        nDil = "3"
                         inputFile = os.path.join(inputDir, "result_diff.pfm")
                         outputFile = os.path.join(inputDir, "result_diff.pfm")
                         re = subprocess.run(
@@ -1493,339 +1550,4 @@ if __name__ == "__main__":
             os.environ.update(_environ)
 
     FinalBRDFOpt = 0
-    if FinalBRDFOpt:
-        CapSimOption = 0
-        CapNrmCombine = 0
-        FitRouOption = 0
-        texWidth="1024"
-        texHeight="1024"
 
-        _environ = dict(os.environ)
-        try:
-            if 'PATH' in _environ:
-                os.environ['PATH'] = os.environ['PATH'] + ";" + BUILD_ROOT + ";" + TOOL_ROOT +";" + TOOL_LCT_ROOT
-            else:
-                os.environ['PATH'] = BUILD_ROOT + ";" + TOOL_ROOT + ";" + TOOL_LCT_ROOT
-
-            FinalBRDFOptDirName = "FinalOpt2"
-            if MeshOpt:
-                reModel = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "Recover.obj")
-                reModelR = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverR.obj")
-                reModelUV = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverUV.obj")
-                reModelUVR = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverUVR.obj")
-                if MeshOptPreprocess:
-                    logger.info("Preprocess model ")
-                    # remove degenerated faces
-                    # rmBadFace(reModel, reModelR)
-                    mesh = trimesh.load(reModel)
-                    mesh.remove_degenerate_faces()
-                    # mesh = mesh.subdivide()
-                    mesh.export(reModelR)
-
-                    logger.info("Remesh model ")
-                    edgeLength = "0.0001"
-                    re = subprocess.run(
-                            ["LCT", "-i" , reModelR, "-o" , reModelR,"-l",edgeLength],
-                            stdout=True, stderr=True, check=True)
-                    print(re)
-
-                    # logger.info("UVAtlas ")
-                    # # UVAtlas parameterization
-                    # re = subprocess.run(
-                    #     ["UVAtlas", "-iv","TEXCOORD","-w",texWidth,"-h",texHeight,"-t","-y", "-o", reModelUV, reModelR],
-                    #     stdout=True, stderr=True, check=True)
-                    # #
-                    # # logger.info("Merge vertices separated by UVAtlas ")
-                    # # # remove degenerated faces
-                    # # # rmBadFace(reModel, reModelR)
-                    #
-                    # # mesh = trimesh.load(reModelUV,file_type="ply",resolver=None,include_texture=True)
-                    # # mesh.merge_vertices()
-                    # # mesh.remove_degenerate_faces()
-                    # # # mesh = mesh.subdivide()
-                    # # print(mesh.vertex_normals)
-                    # # mesh.export(reModelUVR,encoding='ascii')
-                    #
-                    # logger.info("Project recovered model into each view:")
-                    # for v in range(startView, nViewsCount):
-                    #     logger.info("Dealing view: {0}th".format(v))
-                    #     modelFile = reModelUV
-                    #
-                    #     viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d" % v)
-                    #     framesDirectory = os.path.join(viewDirectory, "Frames")
-                    #
-                    #     nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
-                    #     nrmRefineFramesDirectory = os.path.join(nrmRefineDirectory, "FramesMeshOpt")
-                    #
-                    #     cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt" % v)
-                    #     renderOption = "2"
-                    #     re = subprocess.run(
-                    #         ["CapSim", "-framesDirectory=" + nrmRefineFramesDirectory, "-modelFile=" + modelFile,
-                    #          "-cameraConfig=" + cameraConfig, "-cameraExtrin=" + cameraExtrinsic,
-                    #          "-viewScale=" + viewScale, "-flipZ",
-                    #          "-renderOption=" + renderOption],
-                    #         stdout=True, stderr=True, check=True)
-
-                if MeshOptCapNrmCombine:
-                    # combine all views' nrm into uv texture
-                    logger.info("CapTexCombine: combine into texture space ")
-                    viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
-
-                    framesDirectory = os.path.join(viewDirectory, "Frames")
-                    nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
-                    nrmRefineFramesDirectory = os.path.join(nrmRefineDirectory, "FramesMeshOpt")
-                    nrmRefineIterFinalDir = os.path.join(nrmRefineDirectory, "Iter", "Iter_final")
-                    cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt")
-
-                    # viewRecNrmDir = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-pig2\Views\View_%04d\Recover\Combine\Iter\Iter_final\refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=1_dptWeight=1_fDistTH=0.01_nDptIters=1"
-                    viewNrmRefineImgFile = os.path.join(nrmRefineIterFinalDir,r"nrmR.pfm") #in world space where nrm is estimated
-                    viewRecNrmDir = os.path.join(nrmRefineDirectory,nrmRefRecDirName)
-                    viewDistImgFile = os.path.join(viewRecNrmDir, "distR.pfm")
-                    viewNrmImgFile = os.path.join(viewRecNrmDir, "nrmObj.pfm")
-                    viewMaskImgFile = os.path.join(nrmRefineFramesDirectory, "mask.pfm")
-                    viewMaskImgFile = os.path.join(nrmRefineIterFinalDir, "specNicePeakMask.pfm")
-                    viewTexCoordImgFile = os.path.join(nrmRefineFramesDirectory, "tex.pfm")
-
-                    refineNrmRouWeight = os.path.join(nrmRefineIterFinalDir, r"Base_r_%.5f/weight.pfm")
-                    refineNrmDiffWeight = os.path.join(nrmRefineIterFinalDir, r"Base_diffuse/weight.pfm")
-
-                    texNrmImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "TexNrm.pfm")
-                    texPosImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "TexPos.pfm")
-                    texDiffImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", r"Base_diffuse/weight.pfm")
-                    texSpecRouImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", r"Base_r_%.5f/weight.pfm")
-                    texSpecFitImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "result_specular.pfm")
-                    texRouFitImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "result_roughness_fitted.pfm")
-
-                    reModelUpt = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverUpdate.obj")
-                    reModelUptPly = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverUpdate.ply")
-                    reModelFinal = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverFinal.ply")
-                    reModelFinalObj = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverFinal.obj")
-                    reModelFinalPost = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverPostProcess.obj")
-
-                    # re = subprocess.run(
-                    #     ["CapNrmCombine",
-                    #      "-viewNrmImgFile=" + viewNrmImgFile, "-viewDistImgFile=" + viewDistImgFile,
-                    #      "-viewTexCoordImgFile=" + viewTexCoordImgFile,
-                    #      "-viewDiffWeightFile=" + refineNrmDiffWeight, "-viewSpecRouWeightFile=" + refineNrmRouWeight,
-                    #      "-genericRoughnesses=" + genericRoughnesses,
-                    #      "-texNrmImgFile=" + texNrmImgFile,
-                    #      "-texDiffImgFile=" + texDiffImgFile,
-                    #      "-texSpecRouImgFile=" + texSpecRouImgFile,
-                    #      "-viewMaskImgFile=" + viewMaskImgFile, "-nViews=" + nViews, "-width=" + texWidth,
-                    #      "-height=" + texHeight,
-                    #      "-srcModelFile=" + reModelUV, "-tarModelFile=" + reModelUpt, "-flipZ","--solveRou",
-                    #      "-texSpecFitImgFile=" + texSpecFitImgFile, "-texRouFitImgFile=" + texRouFitImgFile
-                    #      ], stdout=True, stderr=True, check=True)
-
-                    re = subprocess.run(
-                        ["CapTexCombine",
-                         "-viewFramesDirectory=" + viewRecNrmDir,
-                         "-viewNrmImgFile=" + viewNrmImgFile, "-viewDistImgFile=" + viewDistImgFile,
-                         "-viewTexCoordImgFile=" + viewTexCoordImgFile,
-                         "-viewDiffWeightFile=" + refineNrmDiffWeight, "-viewSpecRouWeightFile=" + refineNrmRouWeight,
-                         "-genericRoughnesses=" + genericRoughnesses,
-                         "-texNrmImgFile=" + texNrmImgFile,
-                         "-texPosImgFile=" + texPosImgFile,
-                         "-texDiffImgFile=" + texDiffImgFile,
-                         "-texSpecRouImgFile=" + texSpecRouImgFile,
-                         "-viewMaskImgFile=" + viewMaskImgFile, "-nViews=" + nViews, "-uvWidth=" + texWidth,
-                         "-uvHeight=" + texHeight,
-                         "-srcModelFile=" + reModelUV, "-tarModelFile=" + reModelUpt, "-flipZ", "--solveRou",
-                         "-texSpecFitImgFile=" + texSpecFitImgFile, "-texRouFitImgFile=" + texRouFitImgFile,
-                         "-cameraConfig=" + cameraConfig, "-cameraExtrin=" + cameraExtrinsic,
-                         "-viewScale=" + viewScale
-                         ], stdout=True, stderr=True, check=True)
-
-                    logger.info("Change obj into ply")
-                    # mesh.export(plyFile, "ply", encoding='ascii', vertex_normal=True)
-                    obj2ply(reModelUpt, reModelUptPly)
-
-                    re = subprocess.run(
-                        ["mesh_opt", reModelUptPly, "norm:"+ reModelFinal], stdout=True, stderr=True, check=True)
-                    ply2obj(reModelFinal,reModelFinalObj)
-
-                    reModelFinalPoission = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverFinalPoission.ply")
-                    reModelFinalTrim = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverFinalTrim.ply")
-
-                    re = subprocess.run(
-                        ["PoissonRecon.exe", "--in", reModelFinal, "--out", reModelFinalPoission, "--normals", "--pointWeight",
-                         "0",
-                         "--depth",
-                         "10", "--density", "--threads", "2"], stdout=True, stderr=True,
-                        check=True)
-                    # trim combined mesh
-                    re = subprocess.run(
-                        ["SurfaceTrimmer.exe", "--in", reModelFinalPoission, "--out", reModelFinalTrim, "--trim", "7"],
-                        stdout=True, stderr=True, check=True)
-
-                    # mesh = trimesh.Trimesh()
-                    mesh = trimesh.load(reModelFinalTrim)
-                    # mesh = trimesh.load(reModelFinalObj)
-                    print(len(mesh.vertices))
-                    mesh.merge_vertices()
-                    print(len(mesh.vertices))
-                    mesh.remove_degenerate_faces()
-                    # mesh = mesh.subdivide()
-                    mesh.export(reModelFinalPost)
-
-            if MeshOptSecond:
-                meshFinalOptDir = reModel = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt")
-                if not os.path.exists(meshFinalOptDir):
-                    os.makedirs(meshFinalOptDir)
-                # when mesh_opt finished, combine all textures together using new uv
-                reModel = os.path.join(OBJECT_ROOT, r"Recover\Model\Final", "RecoverPostProcess.obj")
-                reModelR = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "RecoverR.obj")
-                reModelUV = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "RecoverUV.obj")
-
-                if MeshOptSecondPreprocess:
-                    logger.info("Preprocess model ")
-                    # remove degenerated faces
-                    rmBadFace(reModel, reModelR)
-
-                    logger.info("UVAtlas ")
-                    # UVAtlas parameterization
-                    re = subprocess.run(
-                        ["UVAtlas", "-iv", "TEXCOORD", "-w", texWidth, "-h", texHeight, "-t", "-y", "-o", reModelUV,
-                         reModelR],
-                        stdout=True, stderr=True, check=True)
-
-                    logger.info("Project recovered model into each view:")
-                    startView = 0
-                    for v in range(startView, nViewsCount):
-                        logger.info("Dealing view: {0}th".format(v))
-                        modelFile = reModelUV
-                        viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d" % v)
-                        framesDirectory = os.path.join(viewDirectory, "Frames")
-
-                        nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
-                        nrmRefineFramesDirectory = os.path.join(nrmRefineDirectory, "FramesFinal")
-
-                        cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt" % v)
-                        renderOption = "2"
-                        re = subprocess.run(
-                            ["CapSim", "-framesDirectory=" + nrmRefineFramesDirectory, "-modelFile=" + modelFile,
-                             "-cameraConfig=" + cameraConfig, "-cameraExtrin=" + cameraExtrinsic,
-                             "-viewScale=" + viewScale, "-flipZ",
-                             "-renderOption=" + renderOption],
-                            stdout=True, stderr=True, check=True)
-
-                if MeshOptCapNrmCombine:
-                    # combine all views' nrm into uv texture
-                    logger.info("CapTexCombine: combine into texture space ")
-                    viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
-
-                    framesDirectory = os.path.join(viewDirectory, "Frames")
-                    nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
-                    nrmRefineFramesDirectory = os.path.join(nrmRefineDirectory, "FramesFinal")
-                    nrmRefineIterFinalDir = os.path.join(nrmRefineDirectory, "Iter", "Iter_final")
-                    cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt")
-
-                    # viewRecNrmDir = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-pig2\Views\View_%04d\Recover\Combine\Iter\Iter_final\refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=1_dptWeight=1_fDistTH=0.01_nDptIters=1"
-                    viewNrmRefineImgFile = os.path.join(nrmRefineIterFinalDir,r"nrmR.pfm")
-                    viewRecNrmDir = os.path.join(nrmRefineDirectory, nrmRefRecDirName)
-                    viewDistImgFile = os.path.join(viewRecNrmDir, "distR.pfm")
-                    viewNrmImgFile = os.path.join(viewRecNrmDir, "nrmObj.pfm")
-                    viewMaskImgFile = os.path.join(nrmRefineFramesDirectory, "mask.pfm")
-                    viewTexCoordImgFile = os.path.join(nrmRefineFramesDirectory, "tex.pfm")
-                    viewMaskImgFile = os.path.join(nrmRefineIterFinalDir, "specNicePeakMask.pfm")
-
-                    refineNrmRouWeight = os.path.join(nrmRefineIterFinalDir, r"Base_r_%.5f/weight.pfm")
-                    refineNrmDiffWeight = os.path.join(nrmRefineIterFinalDir, r"Base_diffuse/weight.pfm")
-
-                    texNrmImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "TexNrm.pfm")
-                    texPosImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "TexPos.pfm")
-                    texDiffImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", r"Base_diffuse/weight.pfm")
-                    texSpecRouImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", r"Base_r_%.5f/weight.pfm")
-                    texSpecFitImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "result_specular.pfm")
-                    texRouFitImgFile = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "result_roughness_fitted.pfm")
-
-                    reModelUpt = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "RecoverUpdate.obj")
-                    reModelUptPly = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "RecoverUpdate.ply")
-                    reModelFinal = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "RecoverFinal.ply")
-                    reModelFinalObj = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt", "RecoverFinal.obj")
-                    reModelFinalObjFlip = os.path.join(OBJECT_ROOT, r"Recover\Model\FinalOpt\Object","RecoverFinalFlip.obj")
-
-                    re = subprocess.run(
-                        ["CapTexCombine",
-                         "-viewFramesDirectory=" + viewRecNrmDir,
-                         "-viewNrmImgFile=" + viewNrmImgFile, "-viewDistImgFile=" + viewDistImgFile,
-                         "-viewTexCoordImgFile=" + viewTexCoordImgFile,
-                         "-viewDiffWeightFile=" + refineNrmDiffWeight, "-viewSpecRouWeightFile=" + refineNrmRouWeight,
-                         "-genericRoughnesses=" + genericRoughnesses,
-                         "-texNrmImgFile=" + texNrmImgFile,
-                         "-texPosImgFile=" + texPosImgFile,
-                         "-texDiffImgFile=" + texDiffImgFile,
-                         "-texSpecRouImgFile=" + texSpecRouImgFile,
-                         "-viewMaskImgFile=" + viewMaskImgFile, "-nViews=" + nViews, "-uvWidth=" + texWidth,
-                         "-uvHeight=" + texHeight,
-                         "-srcModelFile=" + reModelUV, "-tarModelFile=" + reModelUpt, "-flipZ", "--solveRou",
-                         "-texSpecFitImgFile=" + texSpecFitImgFile, "-texRouFitImgFile=" + texRouFitImgFile,
-                         "-cameraConfig=" + cameraConfig, "-cameraExtrin=" + cameraExtrinsic,
-                         "-viewScale=" + viewScale
-                         ], stdout=True, stderr=True, check=True)
-
-                    logger.info("Change obj into ply")
-                    # mesh.export(plyFile, "ply", encoding='ascii', vertex_normal=True)
-                    obj2ply(reModelUpt, reModelUptPly)
-
-                    re = subprocess.run(
-                        ["mesh_opt", reModelUptPly, "norm:"+ reModelFinal], stdout=True, stderr=True, check=True)
-                    ply2obj(reModelFinal,reModelFinalObj)
-
-                    re = subprocess.run(
-                        ["CapNrmCombine",
-                         "-viewNrmImgFile=" + viewNrmImgFile, "-viewDistImgFile=" + viewDistImgFile,
-                         "-viewTexCoordImgFile=" + viewTexCoordImgFile,
-                         "-viewDiffWeightFile=" + refineNrmDiffWeight, "-viewSpecRouWeightFile=" + refineNrmRouWeight,
-                         "-genericRoughnesses=" + genericRoughnesses,
-                         "-texNrmImgFile=" + texNrmImgFile,
-                         "-texDiffImgFile=" + texDiffImgFile,
-                         "-texSpecRouImgFile=" + texSpecRouImgFile,
-                         "-viewMaskImgFile=" + viewMaskImgFile, "-nViews=" + nViews, "-width=" + texWidth,
-                         "-height=" + texHeight,
-                         "-srcModelFile=" + reModelUV, "-tarModelFile=" + reModelUpt, "-flipZ", "-solveRou",
-                         "-texSpecFitImgFile=" + texSpecFitImgFile, "-texRouFitImgFile=" + texRouFitImgFile
-                         ], stdout=True, stderr=True, check=True)
-
-                    re = subprocess.run(
-                        ["CapBRDFCombine",
-                         "-viewFramesDirectory=" + viewRecNrmDir,
-                         "-viewNrmImgFile=" + viewNrmImgFile, "-viewDistImgFile=" + viewDistImgFile,
-                         "-viewTexCoordImgFile=" + viewTexCoordImgFile,
-                         "-viewDiffWeightFile=" + refineNrmDiffWeight, "-viewSpecRouWeightFile=" + refineNrmRouWeight,
-                         "-genericRoughnesses=" + genericRoughnesses,
-                         "-texNrmImgFile=" + texNrmImgFile,
-                         "-texPosImgFile=" + texPosImgFile,
-                         "-texDiffImgFile=" + texDiffImgFile,
-                         "-texSpecRouImgFile=" + texSpecRouImgFile,
-                         "-viewMaskImgFile=" + viewMaskImgFile, "-nViews=" + nViews, "-uvWidth=" + texWidth,
-                         "-uvHeight=" + texHeight,
-                         "-srcModelFile=" + reModelUV, "-tarModelFile=" + reModelUpt, "-flipZ", "-solveRou",
-                         "-texSpecFitImgFile=" + texSpecFitImgFile, "-texRouFitImgFile=" + texRouFitImgFile,
-                         "-cameraConfig=" + cameraConfig, "-cameraExtrin=" + cameraExtrinsic,
-                         "-viewScale=" + viewScale
-                         ], stdout=True, stderr=True, check=True)
-
-                    if not os.path.exists(os.path.dirname(reModelFinalObjFlip)):
-                        os.makedirs(os.path.dirname(reModelFinalObjFlip))
-
-                    FitRouOption = 1
-                    if FitRouOption:
-                        # meshUpt = trimesh.load(reModelUpt)
-                        # meshRefined = trimesh.load(reModelFinal)
-                        # meshUpt.vertices = meshRefined.vertices
-                        # #after UVAtlas, vertices size is not consistent with vertex_texture
-                        # A = meshUpt.metadata['vertex_texture'][0:len(meshUpt.vertices)]
-                        # meshUpt.metadata['vertex_texture'] = A
-                        # print(meshUpt.vertex_normals)
-                        # ex.export_mesh(meshUpt,reModelFinalObj,file_type="obj",include_normals=True,include_texture=True)
-                        logger.info("Create model: ")
-                        re = subprocess.run(
-                            ["ModelTool",
-                             "-srcModelFile=" + reModelUV, "-tarModelFile=" + reModelFinalObjFlip, "-flipZ","--flipVC","-tarTex",
-                             "-tarTexDiffFile=" + texDiffImgFile, "-tarTexSpecFile=" + texSpecFitImgFile, "-tarTexRouFile="+texRouFitImgFile
-                             ], stdout=True, stderr=True, check=True)
-
-        finally:
-            os.environ.clear()
-            os.environ.update(_environ)

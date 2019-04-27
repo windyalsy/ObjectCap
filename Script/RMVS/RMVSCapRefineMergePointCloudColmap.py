@@ -1,5 +1,4 @@
-#parallel preprocess scan data
-#automatically download image data and preprocess them
+#Refine with colmap point cloud
 
 import os
 import subprocess
@@ -73,23 +72,23 @@ if __name__ == "__main__":
     colScanHeight = "23"
 
     # OBJECT_MERGE = r"RealObject-cookiesMerge"
-    # OBJECT_MERGE = r"RealObject-oatmealMerge"
-    OBJECT_MERGE = r"RealObject-giftMerge"
+    OBJECT_MERGE = r"RealObject-oatmealMerge"
+    # OBJECT_MERGE = r"RealObject-giftMerge"
     OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object',OBJECT_MERGE)
     OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model","FinalSfM")
     OBJECT_Model_Dir_MERGE_OPT = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model", "FinalOpt")
 
     # OBJECT1 = r"RealObject-cookies"
-    # OBJECT1 = r"RealObject-oatmeal"
-    OBJECT1 = r"RealObject-gift1"
+    OBJECT1 = r"RealObject-oatmeal"
+    # OBJECT1 = r"RealObject-gift1"
     OBJECT_ROOT1 = os.path.join(DATA_ROOT_E, r'Object',OBJECT1)
     OBJECT_ViewDir1 = os.path.join(OBJECT_ROOT1, "Views", "View_%04d")
     OBJECT_Model_Dir1 = os.path.join(OBJECT_ROOT1, "Recover", "Model","FinalOpt")
 
     # OBJECT2 = r"RealObject-cookies2"
-    # OBJECT2 = r"RealObject-oatmeal2"
-    OBJECT2 = r"RealObject-gift2"
-    OBJECT_ROOT2 = os.path.join(DATA_ROOT, r'Object',OBJECT2)
+    OBJECT2 = r"RealObject-oatmeal2"
+    # OBJECT2 = r"RealObject-gift2"
+    OBJECT_ROOT2 = os.path.join(DATA_ROOT_E, r'Object',OBJECT2)
     OBJECT_ViewDir2 = os.path.join(OBJECT_ROOT2, "Views", "View_%04d")
     OBJECT_Model_Dir2 = os.path.join(OBJECT_ROOT2, "Recover", "Model","FinalOpt")
 
@@ -98,12 +97,12 @@ if __name__ == "__main__":
     cameraConfig2 = os.path.join(CONFIG_ROOT, "Setup" + OBJECT2, "cameraConfig.txt")
 
     # Camera extrinsic, scale setting
-    viewScale = "0.009"
-    cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "CalibPrism", "Extrinsic")
-    cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "CalibPrism", "Extrinsic")
-    # viewScale = "1"
-    # cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "ColmapSfM", "Extrinsic")
-    # cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "ColmapSfM", "Extrinsic")
+    # viewScale = "0.009"
+    # cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "CalibPrism", "Extrinsic")
+    # cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "CalibPrism", "Extrinsic")
+    viewScale = "1"
+    cameraExtrinDirectory1 = os.path.join(OBJECT_ROOT1, "ColmapSfM", "Extrinsic")
+    cameraExtrinDirectory2 = os.path.join(OBJECT_ROOT2, "ColmapSfM", "Extrinsic")
 
     keyPointsUVFile1 = os.path.join(OBJECT_Model_Dir_MERGE,"keyPointsUV1.txt")
     keyPointsUVFile2 = os.path.join(OBJECT_Model_Dir_MERGE,"keyPointsUV2.txt")
@@ -111,16 +110,16 @@ if __name__ == "__main__":
     keyPointsPosFile2 = os.path.join(OBJECT_Model_Dir_MERGE,"keyPointsPos2.txt")
 
     # tranform second point cloud into the first one
-    transExtrinFile = os.path.join(OBJECT_Model_Dir_MERGE,"transExtrin.txt")
-    # transExtrinFile = os.path.join(OBJECT_Model_Dir_MERGE,"transExtrinIdentity.txt")
+    # transExtrinFile = os.path.join(OBJECT_Model_Dir_MERGE,"transExtrin.txt")
+    transExtrinFile = os.path.join(OBJECT_Model_Dir_MERGE,"transExtrinIdentity.txt")
 
 
     # refine normal MVS setting
     # nrmRefRecDirName1 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=1_dptWeight=1_fDistTH=0.5_nDptIters=1"
-    nrmRefRecDirName1 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=10_dptWeight=10_fDistTH=1_nDptIters=2"
-    nrmRefRecDirName2 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=10_dptWeight=10_fDistTH=1_nDptIters=2"
-    # nrmRefRecDirName1 = "ColmapSfM"
-    # nrmRefRecDirName2 = "ColmapSfM"
+    # nrmRefRecDirName1 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=10_dptWeight=10_fDistTH=1_nDptIters=2"
+    # nrmRefRecDirName2 = "refineNrBasesIter(WithTH)_rgbWeight=1_nrmWeight=10_dptWeight=10_fDistTH=1_nDptIters=2"
+    nrmRefRecDirName1 = "ColmapSfM"
+    nrmRefRecDirName2 = "ColmapSfM"
 
     # Option setting
 
@@ -136,16 +135,16 @@ if __name__ == "__main__":
 
         FinalMeshOpt = 1
         if FinalMeshOpt:
-            MeshOpt = 1
+            MeshOpt = 0
             MeshOptPreprocess = 1
             MeshOptCapNrmCombine = 1
             MeshOptSecond = 1
-            MeshOptSecondPreprocess = 1
+            MeshOptSecondPreprocess = 0
             MeshOptSecondCapNrmCombine = 1
             FitRouOption = 1
             texWidth = "1024"
             texHeight = "1024"
-            edgeLength = "0.001"
+            edgeLength = "0.003"
             meshOpt_nIter = 2
 
             # MODEL_ROOT = os.path.join(OBJECT_ROOT, r"Recover\Model")
@@ -319,6 +318,11 @@ if __name__ == "__main__":
                              "-viewScale=" + viewScale
                              ], stdout=True, stderr=True, check=True)
 
+                        re = subprocess.run(
+                            ["ImgDilator", "-in=" + texNrmImgFile, "-out=" + texNrmImgFile, "-n=" + "2"], stdout=True,
+                            stderr=True,
+                            check=True)
+
                         logger.info("Update normal")
                         re = subprocess.run(
                             ["CapUpdateNrm",
@@ -438,7 +442,8 @@ if __name__ == "__main__":
                     viewNrmImgFile1 = os.path.join(viewRecNrmDir1, "nrmObj.pfm")
                     # viewMaskImgFile1 = os.path.join(nrmRefineFramesDirectory1, "mask.pfm")
                     viewGeoNrmImgFile1 = os.path.join(viewMeshMergeFinalDir1, "nrmObj.pfm")
-                    viewMaskImgFile1 = os.path.join(nrmRefineIterFinalDir1, "specNicePeakMask.pfm")
+                    # viewMaskImgFile1 = os.path.join(nrmRefineIterFinalDir1, "specNicePeakMask.pfm")
+                    viewMaskImgFile1 = os.path.join(nrmRefineIterFinalDir1, "nicePeakMask.pfm")
 
                     refineNrmRouWeight1 = os.path.join(nrmRefineIterFinalDir1, r"Base_r_%.5f/weight.pfm")
                     refineNrmDiffWeight1 = os.path.join(nrmRefineIterFinalDir1, r"Base_diffuse/weight.pfm")
@@ -458,7 +463,8 @@ if __name__ == "__main__":
                     viewNrmImgFile2 = os.path.join(viewRecNrmDir2, "nrmObj.pfm")
                     # viewMaskImgFile2 = os.path.join(nrmRefineFramesDirectory2, "mask.pfm")
                     viewGeoNrmImgFile2 = os.path.join(viewMeshMergeFinalDir2, "nrmObj.pfm")
-                    viewMaskImgFile2 = os.path.join(nrmRefineIterFinalDir2, "specNicePeakMask.pfm")
+                    # viewMaskImgFile2 = os.path.join(nrmRefineIterFinalDir2, "specNicePeakMask.pfm")
+                    viewMaskImgFile2 = os.path.join(nrmRefineIterFinalDir2, "nicePeakMask.pfm")
 
                     refineNrmRouWeight2 = os.path.join(nrmRefineIterFinalDir2, r"Base_r_%.5f/weight.pfm")
                     refineNrmDiffWeight2 = os.path.join(nrmRefineIterFinalDir2, r"Base_diffuse/weight.pfm")
@@ -493,6 +499,11 @@ if __name__ == "__main__":
                          "-transExtrin=" + transExtrinFile,
                          "-viewScale=" + viewScale
                          ], stdout=True, stderr=True, check=True)
+
+                    re = subprocess.run(
+                        ["ImgDilator", "-in=" + texNrmImgFile, "-out=" + texNrmImgFile, "-n=" + "2"], stdout=True,
+                        stderr=True,
+                        check=True)
 
                     logger.info("Update normal")
                     re = subprocess.run(

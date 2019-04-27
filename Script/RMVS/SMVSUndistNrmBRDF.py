@@ -49,8 +49,8 @@ if __name__ == "__main__":
     # OBJECT = r"RealObject-pig2"
     # OBJECT = r"RealObject-penrack3"
     # OBJECT = r"RealObject-pig2"
-    # OBJECT = r"RealObject-oatmeal"
-    OBJECT = r"RealObject-cookies"
+    OBJECT = r"RealObject-oatmeal"
+    # OBJECT = r"RealObject-cookies"
     # OBJECT = r"RealObject-cookies2"
     # OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object', OBJECT)
     OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object', OBJECT)
@@ -111,7 +111,9 @@ if __name__ == "__main__":
 
     if UndistOpt:
         logger.info("Third Part: refine nrm ")
-        BackUpOpt = 1
+        BackUpOpt = 0
+        UndistortOpt = 0
+        DistortOpt = 1
 
         _environ = dict(os.environ)
         try:
@@ -146,20 +148,28 @@ if __name__ == "__main__":
 
                 if BackUpOpt:
                     viewNrmImgFileBackup = os.path.join(viewRecNrmDir, "nrmObjBackup.pfm")
-                    shutil.copy(viewNrmImgFile,viewNrmImgFileBackup)
+                    if not os.path.isfile(viewNrmImgFileBackup):
+                        shutil.copy(viewNrmImgFile,viewNrmImgFileBackup)
 
                     refineNrmDiffWeightBackup = os.path.join(nrmRefineIterFinalDir, r"Base_diffuse/weightBackup.pfm")
-                    shutil.copy(refineNrmDiffWeight,refineNrmDiffWeightBackup)
+                    if not os.path.isfile(refineNrmDiffWeightBackup):
+                        shutil.copy(refineNrmDiffWeight,refineNrmDiffWeightBackup)
 
-                re = subprocess.run(
-                    ["ImgUndistort", "-cameraConfig=" + cameraConfig, "-in=" + viewNrmImgFile, "-out=" + viewNrmImgFile],
-                    stdout=True, stderr=True, check=True)
+                if UndistOpt:
+                    re = subprocess.run(
+                        ["ImgUndistort", "-cameraConfig=" + cameraConfig, "-in=" + viewNrmImgFile, "-out=" + viewNrmImgFile],
+                        stdout=True, stderr=True, check=True)
 
-                re = subprocess.run(
-                    ["ImgUndistort", "-cameraConfig=" + cameraConfig, "-in=" + refineNrmDiffWeight, "-out=" + refineNrmDiffWeight],
-                    stdout=True, stderr=True, check=True)
+                    re = subprocess.run(
+                        ["ImgUndistort", "-cameraConfig=" + cameraConfig, "-in=" + refineNrmDiffWeight, "-out=" + refineNrmDiffWeight],
+                        stdout=True, stderr=True, check=True)
 
+                if DistortOpt:
+                    viewNrmImgFileBackup = os.path.join(viewRecNrmDir, "nrmObjBackup.pfm")
+                    shutil.copy(viewNrmImgFileBackup,viewNrmImgFile)
 
+                    refineNrmDiffWeightBackup = os.path.join(nrmRefineIterFinalDir, r"Base_diffuse/weightBackup.pfm")
+                    shutil.copy(refineNrmDiffWeightBackup,refineNrmDiffWeight)
 
         finally:
             os.environ.clear()

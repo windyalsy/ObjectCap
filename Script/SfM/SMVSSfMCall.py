@@ -10,7 +10,7 @@ import time
 import numpy as np
 import logging
 import trimesh
-from datetime import datetime
+from SSfMDatabase import *
 
 def obj2ply(objFile, plyFile):
     mesh = trimesh.load(objFile,process=None)
@@ -72,16 +72,18 @@ if __name__ == "__main__":
     colScanWidth = "1"
     colScanHeight = "23"
 
-    OBJECT_MERGE = r"RealObject-cookiesMerge"
+    # OBJECT_MERGE = r"RealObject-cookiesMerge"
+    OBJECT_MERGE = r"RealObject-giftMerge"
+    # OBJECT_MERGE = r"RealObject-oatmealMerge"
     OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object',OBJECT_MERGE)
-    OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfM')
-    OBJECT_ROOT_MERGE_SFM_CONFIG = os.path.join(OBJECT_ROOT_MERGE, r'SfM1','SfMConfig')
+    OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfMFromPrism')
+    OBJECT_ROOT_MERGE_SFM_CONFIG = os.path.join(OBJECT_ROOT_MERGE_SFM,'SfMConfig')
     OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model","Final")
 
     # nCount = "2"
     # OBJECT_LIST = "RealObject-cookies,RealObject-cookies2"
-    nCount = "1"
-    OBJECT_LIST = "RealObject-cookies"
+    # nCount = "1"
+    # OBJECT_LIST = "RealObject-oatmeal"
 
     OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object',"%s")
     OBJECT_ViewDir = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
@@ -100,18 +102,23 @@ if __name__ == "__main__":
     colmap_database = os.path.join(OBJECT_COLMAP_ROOT,"database.db")
     colmap_project = os.path.join(OBJECT_COLMAP_ROOT,"project.ini")
 
+    colmap_sparse_modelUpt_dir = os.path.join(OBJECT_COLMAP_ROOT, "sparse", "modelUpt")
+    colmap_modelUpt_imageList = os.path.join(OBJECT_COLMAP_CONFIG, "addImageList.txt")
+    colmap_modelUpt_images_dir = os.path.join(OBJECT_COLMAP_ROOT, "addImages")
+    colmap_sparse_modelUpt_dir = os.path.join(OBJECT_COLMAP_ROOT, "sparse", "modelUpt", "vocab-tree.bin")
 
     # Option setting
     firstOpt = 0
     feature_extractorOpt = 1
     exhaustive_matcherOpt = 1
+    add_feature_extractorOpt = 1
     point_triangulatorOpt = 1
-    add_feature_extractorOpt = 0
-    add_vocab_tree_matcherOpt = 0
     add_image_registerOpt = 1
     logger.info("Start merging objects:")
     if not os.path.exists(OBJECT_Model_Dir_MERGE):
         os.makedirs( OBJECT_Model_Dir_MERGE)
+    if not os.path.exists(colmap_sparse_modelUpt_dir):
+        os.makedirs(colmap_sparse_modelUpt_dir)
 
     _environ = dict(os.environ)
     try:
@@ -126,51 +133,58 @@ if __name__ == "__main__":
                 re = subprocess.run(
                     ["colmap.bat", "feature_extractor",
                      "--database",colmap_database,
-                     "--image_path",OBJECT_COLMAP_IMGDIR],
+                     "--image_path",OBJECT_COLMAP_IMGDIR,
+                     # "--ImageReader.single_camera","0",
+                     # "--ImageReader.single_camera_per_folder","1",
+                     # "--SiftExtraction.num_octaves","2"
+                    # "--SiftExtraction.use_gpu","0"
+                    #  "--SiftExtraction.num_threads", "1",
+                    #  "--SiftExtraction.max_num_features","500"
+                     ],
+                    stdout=True, stderr=True, check=True)
+
+            if add_feature_extractorOpt:
+                for file in os.listdir(colmap_modelUpt_images_dir):
+                    shutil.copy(os.path.join(colmap_modelUpt_images_dir,file),OBJECT_COLMAP_IMGDIR)
+                re = subprocess.run(
+                    ["colmap.bat", "feature_extractor",
+                     "--database",colmap_database,
+                     "--image_path",colmap_modelUpt_images_dir,
+                     # "--image_list_path", colmap_modelUpt_imageList,//without add image list txt, still works
+                     # "--ImageReader.camera_model", "OPENCV",
+                     # "--ImageReader.camera_params", "2539.21,2541.91,67.707,232.282,0,0,0,0"
+                     # "--ImageReader.existing_camera_id","0"
+                     ],
                     stdout=True, stderr=True, check=True)
 
             if exhaustive_matcherOpt:
                 re = subprocess.run(
                     ["colmap.bat", "exhaustive_matcher",
-                     "--database",colmap_database],
+                     "--database", colmap_database],
                     stdout=True, stderr=True, check=True)
 
-            if point_triangulatorOpt:
-                if not os.path.exists(colmap_sparse_model_dir):
-                    os.makedirs(colmap_sparse_model_dir)
-                re = subprocess.run(
-                    ["colmap.bat", "point_triangulator",
-                     "--database",colmap_database,
-                     "--image_path",OBJECT_COLMAP_IMGDIR,
-                     "--input_path",OBJECT_COLMAP_CONFIG,
-                     "--output_path",colmap_sparse_model_dir],
-                    stdout=True, stderr=True, check=True)
+        if point_triangulatorOpt:
+            if not os.path.exists(colmap_sparse_model_dir):
+                os.makedirs(colmap_sparse_model_dir)
+            re = subprocess.run(
+                ["colmap.bat", "point_triangulator",
+                 "--database", colmap_database,
+                 "--image_path", OBJECT_COLMAP_IMGDIR,
+                 "--input_path", OBJECT_COLMAP_CONFIG,
+                 "--output_path", colmap_sparse_model_dir,
+                 "--Mapper.ba_refine_focal_length", "0",
+                 "--Mapper.ba_refine_extra_params", "0",
+                 "--Mapper.tri_create_max_angle_error", "100",
+                 "--Mapper.tri_continue_max_angle_error", "100",
+                 "--Mapper.tri_merge_max_reproj_error", "100",
+                 "--Mapper.tri_complete_max_reproj_error", "100",
+                 "--Mapper.tri_re_max_angle_error", "100",
+                 "--Mapper.tri_re_min_ratio", "0.01",
+                 "--Mapper.min_focal_length_ratio", "0.0001",
+                 "--Mapper.max_focal_length_ratio", "100"
+                 ],
+                stdout=True, stderr=True, check=True)
 
-        colmap_sparse_modelUpt_dir = os.path.join(OBJECT_COLMAP_ROOT, "sparse", "modelUpt")
-        colmap_modelUpt_imageList = os.path.join(OBJECT_COLMAP_CONFIG, "addImageList.txt")
-        colmap_modelUpt_images_dir = os.path.join(OBJECT_COLMAP_ROOT, "addImages")
-        colmap_sparse_modelUpt_dir = os.path.join(OBJECT_COLMAP_ROOT, "sparse", "modelUpt","vocab-tree.bin")
-        if not os.path.exists(colmap_sparse_modelUpt_dir):
-            os.makedirs(colmap_sparse_modelUpt_dir )
-
-        # if add_feature_extractorOpt:
-        #     re = subprocess.run(
-        #         ["colmap.bat", "feature_extractor",
-        #          "--database",colmap_database,
-        #          "--image_path",colmap_modelUpt_images_dir,
-        #          "--image_list_path", colmap_modelUpt_imageList,
-        #          # "--ImageReader.camera_model", "OPENCV",
-        #          # "--ImageReader.camera_params", "2539.21,2541.91,67.707,232.282,0,0,0,0"
-        #          # "--ImageReader.existing_camera_id","0"
-        #          ],
-        #         stdout=True, stderr=True, check=True)
-        # if add_vocab_tree_matcherOpt:
-        #     re = subprocess.run(
-        #     ["colmap.bat", "vocab_tree_matcher",
-        #          "--database",colmap_database,
-        #          "--VocabTreeMatching.vocab_tree_path",OBJECT_COLMAP_IMGDIR,
-        #          "--VocabTreeMatching.match_list_path", colmap_modelUpt_imageList],
-        #         stdout=True, stderr=True, check=True)
         if add_image_registerOpt:
             re = subprocess.run(
                 ["colmap.bat", "image_registrator",
@@ -179,7 +193,14 @@ if __name__ == "__main__":
                  "--output_path",colmap_sparse_modelUpt_dir,
                  "--Mapper.ba_refine_focal_length", "0",
                  "--Mapper.ba_refine_principal_point", "0",
-                 "--Mapper.ba_refine_extra_params", "0"],
+                 "--Mapper.ba_refine_extra_params", "0",
+                 "--Mapper.min_focal_length_ratio", "0.0001",
+                 "--Mapper.max_focal_length_ratio", "100",
+                 "--Mapper.abs_pose_max_error", "3",
+                 "--Mapper.abs_pose_min_num_inlier", "30",
+                 "--Mapper.abs_pose_min_inlier_ratio", "0.25",
+                 "--Mapper.max_reg_trials", "100",
+                 ],
                 stdout=True, stderr=True, check=True)
 
     finally:

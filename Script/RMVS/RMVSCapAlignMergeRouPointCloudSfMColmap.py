@@ -1,5 +1,5 @@
-#parallel preprocess scan data
-#automatically download image data and preprocess them
+#Use colmap recovered point cloud.
+#Add erosion and dilation to remove outliers
 
 import os
 import subprocess
@@ -71,17 +71,19 @@ if __name__ == "__main__":
     colScanWidth = "1"
     colScanHeight = "23"
 
-    # OBJECT_MERGE = r"RealObject-cookiesMerge"
-    OBJECT_MERGE = r"RealObject-oatmealMerge"
+    OBJECT_MERGE = r"RealObject-cookiesMerge"
+    # OBJECT_MERGE = r"RealObject-oatmealMerge"
     OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object',OBJECT_MERGE)
     OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model","FinalSfM")
 
-    OBJECT1 = r"RealObject-oatmeal"
-    OBJECT_ROOT1 = os.path.join(DATA_ROOT_E, r'Object',OBJECT1)
+    OBJECT1 = r"RealObject-cookies"
+    # OBJECT1 = r"RealObject-oatmeal"
+    OBJECT_ROOT1 = os.path.join(DATA_ROOT, r'Object',OBJECT1)
     OBJECT_ViewDir1 = os.path.join(OBJECT_ROOT1, "Views", "View_%04d")
     OBJECT_Model_Dir1 = os.path.join(OBJECT_ROOT1, "Recover", "Model","FinalOpt")
 
-    OBJECT2 = r"RealObject-oatmeal2"
+    OBJECT2 = r"RealObject-cookies2"
+    # OBJECT2 = r"RealObject-oatmeal2"
     OBJECT_ROOT2 = os.path.join(DATA_ROOT_E, r'Object',OBJECT2)
     OBJECT_ViewDir2 = os.path.join(OBJECT_ROOT2, "Views", "View_%04d")
     OBJECT_Model_Dir2 = os.path.join(OBJECT_ROOT2, "Recover", "Model","FinalOpt")
@@ -117,19 +119,18 @@ if __name__ == "__main__":
     # src1Model = os.path.join(OBJECT_Model_Dir1,"RecoverUpdate.obj")
     # src2Model = os.path.join(OBJECT_Model_Dir2,"RecoverUpdate.obj")
 
-    alignColmapModel = os.path.join(OBJECT_Model_Dir_MERGE,"fused.obj")
-    # alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.obj")
-    alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"fusedFlip.obj")
-    # alignModelPly = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.ply")
-    alignModelPly = os.path.join(OBJECT_Model_Dir_MERGE,"fusedFlip.ply")
+    alignColmapModel = os.path.join(OBJECT_Model_Dir_MERGE,"fused.ply")
+    alighModelFlip = os.path.join(OBJECT_Model_Dir_MERGE,"fused.obj")#convert from colmap
     alignModelPoi = os.path.join(OBJECT_Model_Dir_MERGE,"Align_Poi.ply")
     alignModelTrim = os.path.join(OBJECT_Model_Dir_MERGE,"Align_Trim.ply")
+    alignModelRecBefFlip = os.path.join(OBJECT_Model_Dir_MERGE,"Align_RecBefFlip.obj")
     alignModelRec = os.path.join(OBJECT_Model_Dir_MERGE,"Recover_clean.obj")
+
     meshFinalDirObj = os.path.join(OBJECT_Model_Dir_MERGE,"RecoverFinal_clean.obj")
 
     # Option setting
     CapAlignPointCloudOpt = 1
-    CleanPointCloudOption = 0
+    CleanPointCloudOption = 1
     logger.info("Start merging objects:")
     if not os.path.exists( OBJECT_Model_Dir_MERGE):
         os.makedirs( OBJECT_Model_Dir_MERGE)
@@ -154,30 +155,30 @@ if __name__ == "__main__":
             #      "-viewScale=" + viewScale, "-flipZ", "-nViews=" + nViews],
             #     stdout=True, stderr=True, check=True)
             #
-            # from ColMap: model need to be flipped
-            re = subprocess.run(
-                ["ModelConvert.exe", "-srcModelFile=" + alignColmapModel, "-tarModelFile=" + alignModel, "-flipZ", "-flipY"],
-                stdout=True, stderr=True, check=True)
-            obj2ply(alignModel, alignModelPly)
             logger.info("PoissonRecon: ")
             re = subprocess.run(
-                ["PoissonRecon.exe", "--in", alignModelPly, "--out", alignModelPoi, "--normals", "--pointWeight",
+                ["PoissonRecon.exe", "--in", alignColmapModel, "--out", alignModelPoi, "--normals", "--pointWeight",
                  "0",
                  "--depth",
-                 "10", "--density", "--threads","2"], stdout=True, stderr=True,
+                 "8", "--density", "--threads", "16","--samplesPerNode", "5"], stdout=True, stderr=True,
                 check=True)
             # trim combined mesh
             re = subprocess.run(
-                ["SurfaceTrimmer.exe", "--in", alignModelPoi, "--out", alignModelTrim, "--trim", "6"],
+                ["SurfaceTrimmer.exe", "--in", alignModelPoi, "--out", alignModelTrim, "--trim", "4"],
                 stdout=True, stderr=True, check=True)
-            ply2obj(alignModelTrim,alignModelRec)
+            ply2obj(alignModelTrim, alignModelRecBefFlip)
+
+            # from ColMap: model need to be flipped
+            re = subprocess.run(
+                ["ModelConvert.exe", "-srcModelFile=" + alignModelRecBefFlip, "-tarModelFile=" + alignModelRec, "-flipZ", "-flipY"],
+                stdout=True, stderr=True, check=True)
             shutil.copy(alignModelRec,meshFinalDirObj)
 
         if CleanPointCloudOption:
             logger.info("Clean point cloud ")
 
             CapMultiSimOption = 1
-            CapDilateMaskOption = 1
+            CapErodeDilateMaskOption = 1
             CapCleanOption = 1
             clean_nIters = 1
 
@@ -194,7 +195,7 @@ if __name__ == "__main__":
             meshFinalDir = OBJECT_Model_Dir_MERGE
             iterDir = os.path.join(meshFinalDir, "Iter_Merge_Clean")
             firstRecModel = alignModelRec
-            firstCombModel = alignModel
+            firstCombModel = alignModelRec
             if not os.path.exists(iterDir):
                 os.makedirs(iterDir)
 
@@ -218,7 +219,6 @@ if __name__ == "__main__":
                     preComModel = firstCombModel
 
                 logger.info("CapMultiSim ")
-                CapMultiSimOption = 1
                 if CapMultiSimOption:
                     logger.info("CapMultiSim first object 1")
                     cameraExtrinsic1 = os.path.join(cameraExtrinDirectory1, "view_%04d.txt")
@@ -243,22 +243,33 @@ if __name__ == "__main__":
                          "-renderOption=" + renderOption, "-nViews=" + nViews],
                         stdout=True, stderr=True, check=True)
 
-                logger.info("Dilate mask ")
-                if CapDilateMaskOption:
+                logger.info("Erode and dilate mask ")
+                if CapErodeDilateMaskOption:
                     # dilate masks
                     for v in range(nViewsCount):
-                        nDil = "2"
+                        nErod = "3"
+                        nDil = "5"
                         inputFile = os.path.join(viewIterFramesDir1 % v, "mask.pfm")
-                        outputFile = os.path.join(viewIterFramesDir1 % v, "mask_dil.pfm")
+                        erodeFile = os.path.join(viewIterFramesDir1 % v, "mask_erod.pfm")
+                        dilFile = os.path.join(viewIterFramesDir1 % v, "mask_dil.pfm")
                         re = subprocess.run(
-                            ["ImgDilator", "-in=" + inputFile, "-out=" + outputFile, "-n="+nDil], stdout=True, stderr=True,
+                            ["ImgEroder", "-in=" + inputFile, "-out=" + erodeFile, "-n="+nErod], stdout=True, stderr=True,
+                            check=True)
+                        re = subprocess.run(
+                            ["ImgDilator", "-in=" + erodeFile, "-out=" + dilFile, "-n="+nDil], stdout=True, stderr=True,
                             check=True)
                     for v in range(nViewsCount):
-                        nDil = "2"
+                        nErod = "3"
+                        nDil = "5"
                         inputFile = os.path.join(viewIterFramesDir2 % v, "mask.pfm")
-                        outputFile = os.path.join(viewIterFramesDir2 % v, "mask_dil.pfm")
+                        erodeFile = os.path.join(viewIterFramesDir2 % v, "mask_erod.pfm")
+                        dilFile = os.path.join(viewIterFramesDir2 % v, "mask_dil.pfm")
                         re = subprocess.run(
-                            ["ImgDilator", "-in=" + inputFile, "-out=" + outputFile, "-n=" + nDil], stdout=True,
+                            ["ImgEroder", "-in=" + inputFile, "-out=" + erodeFile, "-n=" + nErod], stdout=True,
+                            stderr=True,
+                            check=True)
+                        re = subprocess.run(
+                            ["ImgDilator", "-in=" + erodeFile, "-out=" + dilFile, "-n=" + nDil], stdout=True,
                             stderr=True,
                             check=True)
 
@@ -272,7 +283,7 @@ if __name__ == "__main__":
                         ["CapCleanPointCloud", "-cameraConfig=" + cameraConfig1, "-cameraExtrin=" + cameraExtrinsic1,
                          "-viewMaskImgFile=" + viewMaskImgFile1,
                          "-srcModelFile=" + srcModel, "-tarModelFile=" + tarModel,
-                         "-viewScale=" + viewScale, "-flipZ", "-nViews=" + nViews],
+                         "-viewScale=" + viewScale, "-flipZ", "-nViews=" + nViews,"-ignoreBorder"],
                         stdout=True, stderr=True, check=True)
 
                     cameraExtrinsic2 = os.path.join(cameraExtrinDirectory2, "view_%04d.txt")
@@ -283,7 +294,7 @@ if __name__ == "__main__":
                         ["CapCleanPointCloud", "-cameraConfig=" + cameraConfig2, "-cameraExtrin=" + cameraExtrinsic2,
                          "-viewMaskImgFile=" + viewMaskImgFile2,
                          "-srcModelFile=" + srcModel, "-tarModelFile=" + tarModel,
-                         "-viewScale=" + viewScale, "-flipZ", "-nViews=" + nViews],
+                         "-viewScale=" + viewScale, "-flipZ", "-nViews=" + nViews,"-ignoreBorder"],
                         stdout=True, stderr=True, check=True)
                     # poisson reconstruct combined mesh
 
@@ -294,14 +305,14 @@ if __name__ == "__main__":
                     ["PoissonRecon.exe", "--in", modelInP, "--out", modelOutP, "--normals",
                      "--pointWeight", "0",
                      "--depth",
-                     "10", "--density", "--threads", "2", "--samplesPerNode", "5"], stdout=True,
+                     "8", "--density", "--threads", "16", "--samplesPerNode", "1"], stdout=True,
                     stderr=True, check=True)
                 # trim combined mesh
                 modelInT = modelOutP
                 modelOutT = trimModel % iter
                 re = subprocess.run(
                     ["SurfaceTrimmer.exe", "--in", modelInT, "--out", modelOutT, "--trim",
-                     "6"],
+                     "4"],
                     stdout=True, stderr=True, check=True)
                 ply2obj(modelOutT, recModel % iter)
 
