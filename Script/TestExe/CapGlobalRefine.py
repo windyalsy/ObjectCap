@@ -72,8 +72,8 @@ if __name__ == "__main__":
     colScanHeight = "23"
 
     # OBJECT_MERGE = r"RealObject-cookiesMerge"
-    OBJECT_MERGE = r"RealObject-oatmealMerge"
-    # OBJECT_MERGE = r"RealObject-giftMerge"
+    # OBJECT_MERGE = r"RealObject-oatmealMerge"
+    OBJECT_MERGE = r"RealObject-giftMerge"
     OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object',OBJECT_MERGE)
     OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfMFromPrismMultiSeq')
     OBJECT_ROOT_MERGE_SFM_CONFIG = os.path.join(OBJECT_ROOT_MERGE_SFM,'SfMConfig')
@@ -84,11 +84,13 @@ if __name__ == "__main__":
     # OBJECTS = ["RealObject-oatmeal", "RealObject-oatmeal2"]
     nCount = "1"
     # OBJECTS = ["RealObject-cookies","RealObject-cookies2"]
-    OBJECTS = ["RealObject-cookies"]
+    # OBJECTS = ["RealObject-cookies"]
+    OBJECTS = ["RealObject-penrack3"]
+    # OBJECTS = ["RealObject-gift2"]
     OBJECT_LIST = ','.join(OBJECTS)
 
-    OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object',"%s")
-    # OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object',"%s")
+    # OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object',"%s")
+    OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object',"%s")
     OBJECT_ViewDir = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
     OBJECT_Model_Dir = os.path.join(OBJECT_ROOT, "Recover", "Model","FinalOpt")
     OBJECT_CalibPrism_Dir = os.path.join(OBJECT_ROOT,"CalibPrism")
@@ -108,9 +110,11 @@ if __name__ == "__main__":
     framesDirectory = os.path.join(viewDirectory, "Frames")
     nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
     viewFramesCapDir = framesDirectory
-    viewFramesProjDir = os.path.join(nrmRefineDirectory,"FramesFinalOpt2")
+    viewFramesProjDir = os.path.join(nrmRefineDirectory,"FramesFinal")
 
     # Importance sampling setting
+    # numUniform = "10"
+    # numImportance = "10"
     numUniform = "10"
     numImportance = "10"
 
@@ -123,6 +127,7 @@ if __name__ == "__main__":
     alignModelPoi = os.path.join(OBJECT_Model_Dir_MERGE,"Align_Poi.ply")
     alignModelTrim = os.path.join(OBJECT_Model_Dir_MERGE,"Align_Trim.ply")
     alignModelRec = os.path.join(OBJECT_Model_Dir_MERGE,"Recover.obj")
+
 
     # Option setting
     CapWriteSfMCameraOpt = 1
@@ -138,7 +143,8 @@ if __name__ == "__main__":
             os.environ['PATH'] = BUILD_ROOT + ";" + TOOL_ROOT + ";" + TOOL_LCT_ROOT
 
         if CapWriteSfMCameraOpt:
-            modelFile = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-cookies\Recover\Model\FinalOpt\RecoverUpdate.obj"
+            # modelFile = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-gift2\Recover\Model\FinalOpt\RecoverUpdate.obj"
+            modelFile = r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-penrack3\Recover\Model\FinalOpt\RecoverUpdate.obj"
             re = subprocess.run(
                 ["CapGlobalRefine", "-modelFile=" + modelFile,
                  "-objectListString=" + OBJECT_LIST,
