@@ -56,8 +56,8 @@ if __name__ == "__main__":
     # Option Setting
     # positionStr = r"0.1982,-0.0921,0"
     positionStr = r"0.1988,-0.09269,0"
-    nViewsCount = 36
-    nViews = "36"
+    nViewsCount = 3
+    nViews = "3"
     # Bases Setting
     generics = "20"
     genericStart = "0.01"
@@ -71,34 +71,33 @@ if __name__ == "__main__":
     colScanWidth = "1"
     colScanHeight = "23"
 
+    # OBJECT_MERGE = r"RealObject-cookiesMerge"
+    # OBJECT_MERGE = r"RealObject-oatmealMerge"
+    OBJECT_MERGE = r"RealObject-giftMerge"
+    OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object',OBJECT_MERGE)
+    OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfMFromPrismMultiSeq')
+    OBJECT_ROOT_MERGE_SFM_CONFIG = os.path.join(OBJECT_ROOT_MERGE_SFM,'SfMConfig')
+    OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model","Final")
+
     # nCount = "2"
     # # OBJECTS = ["RealObject-cookies","RealObject-cookies2"]
     # OBJECTS = ["RealObject-oatmeal", "RealObject-oatmeal2"]
     nCount = "1"
     # OBJECTS = ["RealObject-cookies","RealObject-cookies2"]
-    # OBJECTS = ["RealObject-cookies2"]
+    # OBJECTS = ["RealObject-cookies"]
     OBJECTS = ["RealObject-penrack3"]
     # OBJECTS = ["RealObject-gift2"]
     OBJECT_LIST = ','.join(OBJECTS)
 
     # OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object',"%s")
-    OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object',"%s")
+    OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object',OBJECTS[0])
     OBJECT_ViewDir = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
     OBJECT_Model_Dir = os.path.join(OBJECT_ROOT, "Recover", "Model","FinalOpt")
     OBJECT_CalibPrism_Dir = os.path.join(OBJECT_ROOT,"CalibPrism")
     OBJECT_ColmapSfM_Dir = os.path.join(OBJECT_ROOT,"ColmapSfM")
 
-    # OBJECT_MERGE = r"RealObject-cookies2"
-    # OBJECT_MERGE = r"RealObject-oatmealMerge"
-    # OBJECT_MERGE = r"RealObject-giftMerge"
-    OBJECT_MERGE = r"RealObject-penrack3"
-    OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT_E, r'Object', OBJECT_MERGE)
-    OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfMFromPrismMultiSeq')
-    OBJECT_ROOT_MERGE_SFM_CONFIG = os.path.join(OBJECT_ROOT_MERGE_SFM, 'SfMConfig')
-    OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model", "Final")
-
     # Setup setting: camera,
-    cameraConfig = os.path.join(CONFIG_ROOT, "Setup%s", "cameraConfig.txt")
+    cameraConfig = os.path.join(CONFIG_ROOT, "Setup"+OBJECTS[0], "cameraConfig.txt")
     panelConfig = os.path.join(CONFIG_ROOT, "Setup" + OBJECTS[0], "panelConfig.txt") #panelConfig common
 
     # Camera extrinsic, scale setting
@@ -123,15 +122,12 @@ if __name__ == "__main__":
     texWidth = "1024"
     texHeight = "1024"
 
+    alignModel = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.obj")
+    alignModelPly = os.path.join(OBJECT_Model_Dir_MERGE,"AlignPoindCloud.ply")
+    alignModelPoi = os.path.join(OBJECT_Model_Dir_MERGE,"Align_Poi.ply")
+    alignModelTrim = os.path.join(OBJECT_Model_Dir_MERGE,"Align_Trim.ply")
+    alignModelRec = os.path.join(OBJECT_Model_Dir_MERGE,"Recover.obj")
 
-
-    meshFinalOptDir = os.path.join(OBJECT_ROOT_MERGE, r"Recover\Model\FinalOpt")
-    if not os.path.exists(meshFinalOptDir):
-        os.makedirs(meshFinalOptDir)
-    # when mesh_opt finished, combine all textures together using new uv
-    reModelUpt = os.path.join(OBJECT_ROOT_MERGE, r"Recover\Model\FinalOpt", "RecoverUpdate.obj")
-
-    texNrmImgFile = os.path.join(meshFinalOptDir, "TexNrm.pfm")
 
     # Option setting
     CapGlobalRefineOpt = 1
@@ -148,33 +144,26 @@ if __name__ == "__main__":
 
         if CapGlobalRefineOpt:
             # modelFile = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-gift2\Recover\Model\FinalOpt\RecoverUpdate.obj"
-            # modelFile = r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-penrack3\Recover\Model\FinalOpt\RecoverUpdate.obj"
-            # modelFile = r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-penrack3\Recover\Model\FinalOpt\RecoverR.obj"
-            modelFile = reModelUpt
+            modelFile = r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-penrack3\Recover\Model\FinalOpt\RecoverUpdate.obj"
             # output refinement weight files
             refineNrmRouWeight = os.path.join("D:/testGlobalRefine", r"Base_r_%.5f/weight.pfm")
             refineNrmDiffWeight = os.path.join("D:/testGlobalRefine", r"Base_diffuse/weight.pfm")
-            re = subprocess.run(
-                ["CapGlobalRefine", "-modelFile=" + modelFile,
-                 "-objectListString=" + OBJECT_LIST,
-                 "-cameraConfig=" + cameraConfig,
-                 "-panelConfig=" + panelConfig,
-                 "-cameraExtrin=" + cameraExtrin,
-                 "-viewFramesCapDir=" + viewFramesCapDir,
-                 "-viewFramesProjDir=" + viewFramesProjDir,
-                 "-texNrmImgFile=" + texNrmImgFile,
-                 "-uvWidth=" + texWidth,"-uvHeight=" + texHeight,
-                 "-numUniform=" + numUniform, "-numImportance=" + numImportance,
-                 "-nCount=" + nCount, "-nViews=" + nViews,"-viewScale=" + viewScale,
-                 "-flipZ",
-                 "-generics=" + generics, "-genericStart=" + genericStart,"-genericEnd=" + genericEnd,
-                 "-genericRoughnesses=" + genericRoughnesses,
-                 "-rowScanWidth=" + rowScanWidth, "-rowScanHeight=" + rowScanHeight, "-colScanWidth=" + colScanWidth, "-colScanHeight=" + colScanHeight,
-                 "-specRouWeightFile=" + refineNrmRouWeight,
-                 "-diffWeightFile=" + refineNrmDiffWeight,
-                 ],
-                stdout=True, stderr=True, check=True)
+            CapMultiSimOption = 1
+            if CapMultiSimOption:
+                viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
+                nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
+                nrmRefineFramesDirectory = os.path.join(nrmRefineDirectory, "FramesFinalExp")
+                cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt")
+                renderOption = "2"
+                re = subprocess.run(
+                    ["CapMultiSim", "-framesDirectory=" + nrmRefineFramesDirectory, "-modelFile=" + modelFile,
+                     "-cameraConfig=" + cameraConfig, "-cameraExtrin=" + cameraExtrinsic,
+                     "-viewScale=" + viewScale, "-flipZ",
+                     "-renderOption=" + renderOption, "-nViews=" + nViews],
+                    stdout=True, stderr=True, check=True)
 
     finally:
         os.environ.clear()
         os.environ.update(_environ)
+
+
