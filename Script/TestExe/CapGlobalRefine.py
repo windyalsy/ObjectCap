@@ -120,6 +120,13 @@ if __name__ == "__main__":
     # numImportance = "10"
     numUniform = "5"
     numImportance = "5"
+    nCombViews = "5"
+
+    # Refine normal setting
+    thetaStep = "1"
+    phiSize = "4"
+    nIter = "2"
+    thetaSize = "6"
 
     # UV setting
     texWidth = "1024"
@@ -170,6 +177,9 @@ if __name__ == "__main__":
                  "-texNrmImgFile=" + texNrmImgFile,
                  "-uvWidth=" + texWidth,"-uvHeight=" + texHeight,
                  "-numUniform=" + numUniform, "-numImportance=" + numImportance,
+                 "-nCombViews=" + nCombViews,
+                 "-thetaStep=" + thetaStep, "-phiSize=" + phiSize, "-nIter=" + nIter,
+                 "-thetaSize=" + thetaSize,
                  "-nCount=" + nCount, "-nViews=" + nViews,"-viewScale=" + viewScale,
                  "-flipZ",
                  "-generics=" + generics, "-genericStart=" + genericStart,"-genericEnd=" + genericEnd,
