@@ -125,6 +125,9 @@ if __name__ == "__main__":
     texWidth = "1024"
     texHeight = "1024"
 
+    # Record iteration option
+    recordIterOption = "1"
+
     meshFinalOptDir = os.path.join(OBJECT_ROOT_MERGE, r"Recover\Model\FinalOpt")
     if not os.path.exists(meshFinalOptDir):
         os.makedirs(meshFinalOptDir)
@@ -172,7 +175,7 @@ if __name__ == "__main__":
                  "-generics=" + generics, "-genericStart=" + genericStart,"-genericEnd=" + genericEnd,
                  "-genericRoughnesses=" + genericRoughnesses,
                  "-rowScanWidth=" + rowScanWidth, "-rowScanHeight=" + rowScanHeight, "-colScanWidth=" + colScanWidth, "-colScanHeight=" + colScanHeight,
-                 "-workingSpaceDir=" + meshGlobalRefineDir
+                 "-workingSpaceDir=" + meshGlobalRefineDir,"-recordIter="+recordIterOption
                  ],
                 stdout=True, stderr=True, check=True)
 
