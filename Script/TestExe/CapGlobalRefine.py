@@ -77,14 +77,15 @@ if __name__ == "__main__":
     nCount = "1"
     # OBJECTS = ["RealObject-cookies","RealObject-cookies2"]
     # OBJECTS = ["RealObject-cookies2"]
-    OBJECTS = ["RealObject-cookies"]
+    # OBJECTS = ["RealObject-cookies"]
     # OBJECTS = ["RealObject-penrack3"]
     # OBJECTS = ["RealObject-gift2"]
+    OBJECTS = ["RealObject-gift1"]
     OBJECT_LIST = ','.join(OBJECTS)
 
-    OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object',"%s")
-    # OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object',"%s")
-    OBJECT_ViewDir = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
+    # OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object',"%s")
+    OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object',"%s")
+    # OBJECT_ViewDir = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
     OBJECT_Model_Dir = os.path.join(OBJECT_ROOT, "Recover", "Model","FinalOpt")
     OBJECT_CalibPrism_Dir = os.path.join(OBJECT_ROOT,"CalibPrism")
     OBJECT_ColmapSfM_Dir = os.path.join(OBJECT_ROOT,"ColmapSfM")
@@ -93,8 +94,8 @@ if __name__ == "__main__":
     # OBJECT_MERGE = r"RealObject-oatmealMerge"
     # OBJECT_MERGE = r"RealObject-giftMerge"
     OBJECT_MERGE = OBJECTS[0]
-    # OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT_E, r'Object', OBJECT_MERGE)
-    OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object', OBJECT_MERGE)
+    OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT_E, r'Object', OBJECT_MERGE)
+    # OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object', OBJECT_MERGE)
     OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfMFromPrismMultiSeq')
     OBJECT_ROOT_MERGE_SFM_CONFIG = os.path.join(OBJECT_ROOT_MERGE_SFM, 'SfMConfig')
     OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model", "Final")
@@ -116,21 +117,24 @@ if __name__ == "__main__":
     viewFramesProjDir = os.path.join(nrmRefineDirectory,"FramesFinal")
 
     # Importance sampling setting
-    # numUniform = "10"
-    # numImportance = "10"
-    numUniform = "5"
-    numImportance = "5"
+    numUniform = "10"
+    numImportance = "10"
+    # numUniform = "5"
+    # numImportance = "5"
     nCombViews = "5"
 
     # Refine normal setting
     thetaStep = "1"
     phiSize = "4"
     nIter = "2"
-    thetaSize = "6"
+    thetaSize = "8"
 
     # UV setting
     texWidth = "1024"
     texHeight = "1024"
+    # texWidth = "512"
+    # texHeight = "512"
+    divSize = "256"
 
     # Record iteration option
     recordIterOption = "1"
@@ -175,7 +179,7 @@ if __name__ == "__main__":
                  "-viewFramesCapDir=" + viewFramesCapDir,
                  "-viewFramesProjDir=" + viewFramesProjDir,
                  "-texNrmImgFile=" + texNrmImgFile,
-                 "-uvWidth=" + texWidth,"-uvHeight=" + texHeight,
+                 "-uvWidth=" + texWidth,"-uvHeight=" + texHeight,"-divSize=" + divSize,
                  "-numUniform=" + numUniform, "-numImportance=" + numImportance,
                  "-nCombViews=" + nCombViews,
                  "-thetaStep=" + thetaStep, "-phiSize=" + phiSize, "-nIter=" + nIter,

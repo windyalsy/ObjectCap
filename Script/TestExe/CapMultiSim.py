@@ -56,8 +56,8 @@ if __name__ == "__main__":
     # Option Setting
     # positionStr = r"0.1982,-0.0921,0"
     positionStr = r"0.1988,-0.09269,0"
-    nViewsCount = 3
-    nViews = "3"
+    nViewsCount = 36
+    nViews = "36"
     # Bases Setting
     generics = "20"
     genericStart = "0.01"
@@ -71,21 +71,22 @@ if __name__ == "__main__":
     colScanWidth = "1"
     colScanHeight = "23"
 
-    # OBJECT_MERGE = r"RealObject-cookiesMerge"
+    OBJECT_MERGE = r"RealObject-cookiesMerge"
     # OBJECT_MERGE = r"RealObject-oatmealMerge"
-    OBJECT_MERGE = r"RealObject-giftMerge"
+    # OBJECT_MERGE = r"RealObject-giftMerge"
     OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object',OBJECT_MERGE)
     OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfMFromPrismMultiSeq')
     OBJECT_ROOT_MERGE_SFM_CONFIG = os.path.join(OBJECT_ROOT_MERGE_SFM,'SfMConfig')
     OBJECT_Model_Dir_MERGE = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model","Final")
+    OBJECT_Model_Dir_MERGE_OPT = os.path.join(OBJECT_ROOT_MERGE, "Recover", "Model", "FinalOpt")
 
-    # nCount = "2"
-    # # OBJECTS = ["RealObject-cookies","RealObject-cookies2"]
+    nCount = "2"
+    OBJECTS = ["RealObject-cookies","RealObject-cookies2"]
     # OBJECTS = ["RealObject-oatmeal", "RealObject-oatmeal2"]
-    nCount = "1"
+    # nCount = "1"
     # OBJECTS = ["RealObject-cookies","RealObject-cookies2"]
     # OBJECTS = ["RealObject-cookies"]
-    OBJECTS = ["RealObject-penrack3"]
+    # OBJECTS = ["RealObject-penrack3"]
     # OBJECTS = ["RealObject-gift2"]
     OBJECT_LIST = ','.join(OBJECTS)
 
@@ -100,10 +101,15 @@ if __name__ == "__main__":
     cameraConfig = os.path.join(CONFIG_ROOT, "Setup"+OBJECTS[0], "cameraConfig.txt")
     panelConfig = os.path.join(CONFIG_ROOT, "Setup" + OBJECTS[0], "panelConfig.txt") #panelConfig common
 
+    # # Camera extrinsic, scale setting
+    # viewScale = "0.009"
+    # cameraExtrinDirectory = os.path.join(OBJECT_ROOT, "CalibPrism", "Extrinsic")
+    # cameraExtrin =  os.path.join(OBJECT_ROOT, "CalibPrism", "Extrinsic","view_%04d.txt")
+
     # Camera extrinsic, scale setting
-    viewScale = "0.009"
-    cameraExtrinDirectory = os.path.join(OBJECT_ROOT, "CalibPrism", "Extrinsic")
-    cameraExtrin =  os.path.join(OBJECT_ROOT, "CalibPrism", "Extrinsic","view_%04d.txt")
+    viewScale = "1"
+    cameraExtrinDirectory = os.path.join(OBJECT_ROOT, "ColmapSfM", "Extrinsic")
+    cameraExtrin =  os.path.join(OBJECT_ColmapSfM_Dir, "Extrinsic","view_%04d.txt")
 
     # Frames directory setting:
     viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
@@ -127,6 +133,7 @@ if __name__ == "__main__":
     alignModelPoi = os.path.join(OBJECT_Model_Dir_MERGE,"Align_Poi.ply")
     alignModelTrim = os.path.join(OBJECT_Model_Dir_MERGE,"Align_Trim.ply")
     alignModelRec = os.path.join(OBJECT_Model_Dir_MERGE,"Recover.obj")
+    finalModel = os.path.join(OBJECT_Model_Dir_MERGE_OPT,"RecoverUpdate.obj")
 
 
     # Option setting
@@ -144,15 +151,13 @@ if __name__ == "__main__":
 
         if CapGlobalRefineOpt:
             # modelFile = r"D:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-gift2\Recover\Model\FinalOpt\RecoverUpdate.obj"
-            modelFile = r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-penrack3\Recover\Model\FinalOpt\RecoverUpdate.obj"
-            # output refinement weight files
-            refineNrmRouWeight = os.path.join("D:/testGlobalRefine", r"Base_r_%.5f/weight.pfm")
-            refineNrmDiffWeight = os.path.join("D:/testGlobalRefine", r"Base_diffuse/weight.pfm")
+            # modelFile = r"E:\v-jiazha\4-projects\5-LED\2-Source\4-MVS\Object\RealObject-penrack3\Recover\Model\FinalOpt\RecoverUpdate.obj"
+            modelFile = finalModel
             CapMultiSimOption = 1
             if CapMultiSimOption:
                 viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
                 nrmRefineDirectory = os.path.join(viewDirectory, "Recover/NrmRefine")
-                nrmRefineFramesDirectory = os.path.join(nrmRefineDirectory, "FramesFinalExp")
+                nrmRefineFramesDirectory = os.path.join(nrmRefineDirectory, "FramesFinal")
                 cameraExtrinsic = os.path.join(cameraExtrinDirectory, "view_%04d.txt")
                 renderOption = "2"
                 re = subprocess.run(
