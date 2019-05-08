@@ -56,13 +56,14 @@ if __name__ == "__main__":
     # Option Setting
     # positionStr = r"0.1982,-0.0921,0"
     positionStr = r"0.1988,-0.09269,0"
-    nViewsCount = 3
-    nViews = "3"
+    nViewsCount = 36
+    nViews = "36"
     # Bases Setting
     generics = "20"
     genericStart = "0.01"
     genericEnd = "0.60"
-    genericRoughnesses = "0.01,0.02,0.04,0.07,0.09,0.11,0.13,0.16,0.20,0.25,0.40"
+    genericRoughnesses = "0.01,0.02,0.04,0.09,0.13,0.20,0.40"
+    # genericRoughnesses = "0.01,0.02,0.04,0.07,0.09,0.11,0.13,0.16,0.20,0.25,0.40"
     # genericRoughnesses = "0.01,0.02,0.03,0.05,0.07,0.09,0.11,0.13,0.16,0.20,0.25"
 
     # Downsampled lights
@@ -71,19 +72,21 @@ if __name__ == "__main__":
     colScanWidth = "1"
     colScanHeight = "23"
 
-    # nCount = "2"
-    # # OBJECTS = ["RealObject-cookies","RealObject-cookies2"]
+    nCount = "2"
+    OBJECTS = ["RealObject-cookies","RealObject-cookies2"]
     # OBJECTS = ["RealObject-oatmeal", "RealObject-oatmeal2"]
-    nCount = "1"
+    # nCount = "1"
     # OBJECTS = ["RealObject-cookies","RealObject-cookies2"]
     # OBJECTS = ["RealObject-cookies2"]
-    OBJECTS = ["RealObject-cookies"]
+    # OBJECTS = ["RealObject-cookies"]
     # OBJECTS = ["RealObject-penrack3"]
+    # OBJECTS = ["RealObject-oatmeal"]
     # OBJECTS = ["RealObject-gift2"]
+    # OBJECTS = ["RealObject-gift1"]
     OBJECT_LIST = ','.join(OBJECTS)
 
-    OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object',"%s")
-    # OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object',"%s")
+    # OBJECT_ROOT = os.path.join(DATA_ROOT, r'Object',"%s")
+    OBJECT_ROOT = os.path.join(DATA_ROOT_E, r'Object',"%s")
     OBJECT_ViewDir = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
     OBJECT_Model_Dir = os.path.join(OBJECT_ROOT, "Recover", "Model","FinalOpt")
     OBJECT_CalibPrism_Dir = os.path.join(OBJECT_ROOT,"CalibPrism")
@@ -91,8 +94,9 @@ if __name__ == "__main__":
 
     # OBJECT_MERGE = r"RealObject-cookies2"
     # OBJECT_MERGE = r"RealObject-oatmealMerge"
+    OBJECT_MERGE = r"RealObject-cookiesMerge"
     # OBJECT_MERGE = r"RealObject-giftMerge"
-    OBJECT_MERGE = OBJECTS[0]
+    # OBJECT_MERGE = OBJECTS[0]
     # OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT_E, r'Object', OBJECT_MERGE)
     OBJECT_ROOT_MERGE = os.path.join(DATA_ROOT, r'Object', OBJECT_MERGE)
     OBJECT_ROOT_MERGE_SFM = os.path.join(OBJECT_ROOT_MERGE, r'SfMFromPrismMultiSeq')
@@ -103,10 +107,15 @@ if __name__ == "__main__":
     cameraConfig = os.path.join(CONFIG_ROOT, "Setup%s", "cameraConfig.txt")
     panelConfig = os.path.join(CONFIG_ROOT, "Setup" + OBJECTS[0], "panelConfig.txt") #panelConfig common
 
+    # # Camera extrinsic, scale setting
+    # viewScale = "0.009"
+    # cameraExtrinDirectory = os.path.join(OBJECT_ROOT, "CalibPrism", "Extrinsic")
+    # cameraExtrin =  os.path.join(OBJECT_ROOT, "CalibPrism", "Extrinsic","view_%04d.txt")
+
     # Camera extrinsic, scale setting
-    viewScale = "0.009"
-    cameraExtrinDirectory = os.path.join(OBJECT_ROOT, "CalibPrism", "Extrinsic")
-    cameraExtrin =  os.path.join(OBJECT_ROOT, "CalibPrism", "Extrinsic","view_%04d.txt")
+    viewScale = "1"
+    cameraExtrinDirectory = os.path.join(OBJECT_ROOT, "ColmapSfM", "Extrinsic")
+    cameraExtrin =  os.path.join(OBJECT_ColmapSfM_Dir, "Extrinsic","view_%04d.txt")
 
     # Frames directory setting:
     viewDirectory = os.path.join(OBJECT_ROOT, "Views", "View_%04d")
@@ -120,12 +129,12 @@ if __name__ == "__main__":
     numImportance = "10"
     # numUniform = "5"
     # numImportance = "5"
-    nCombViews = "5"
+    nCombViews = "10"
 
     # Refine normal setting
     thetaStep = "1"
     phiSize = "4"
-    nIter = "2"
+    nIter = "1"
     thetaSize = "6"
 
     # UV setting
@@ -134,6 +143,12 @@ if __name__ == "__main__":
 
     # Record iteration option
     recordIterOption = "1"
+    # Image to UV option
+    img2uvOption = "0"
+    # RANSAC option
+    nCandidates = "15"
+    nMaxIters = "10"
+    errThreshold = "0.5"
 
     meshFinalOptDir = os.path.join(OBJECT_ROOT_MERGE, r"Recover\Model\FinalOpt")
     if not os.path.exists(meshFinalOptDir):
@@ -186,7 +201,7 @@ if __name__ == "__main__":
                  "-genericRoughnesses=" + genericRoughnesses,
                  "-rowScanWidth=" + rowScanWidth, "-rowScanHeight=" + rowScanHeight, "-colScanWidth=" + colScanWidth, "-colScanHeight=" + colScanHeight,
                  "-workingSpaceDir=" + meshGlobalRefineDir,"-recordIter="+recordIterOption,
-                 "-img2uvOption=1"
+                 "-img2uvOption=" + img2uvOption, "-nCandidates=" + nCandidates, "-nMaxIters="+ nMaxIters, "-errThreshold="+errThreshold
                  ],
                 stdout=True, stderr=True, check=True)
 
